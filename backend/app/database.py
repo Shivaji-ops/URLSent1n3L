@@ -35,6 +35,9 @@ CREATE TABLE IF NOT EXISTS scans (
 );
 """
 
+# Added after the first release; ALTER keeps existing databases in step.
+ADD_IP_INFO_COLUMN = "ALTER TABLE scans ADD COLUMN IF NOT EXISTS ip_info JSONB;"
+
 CREATE_FEEDBACK_TABLE = """
 CREATE TABLE IF NOT EXISTS feedback (
     id         SERIAL PRIMARY KEY,
@@ -62,6 +65,7 @@ def init_db():
         conn = _conn()
         with conn, conn.cursor() as cur:
             cur.execute(CREATE_SCANS_TABLE)
+            cur.execute(ADD_IP_INFO_COLUMN)
             cur.execute(CREATE_FEEDBACK_TABLE)
         conn.close()
         logger.info('Neon database ready.')
@@ -71,7 +75,7 @@ def init_db():
 
 def insert_scan(
     input_value, scan_type, verdict, confidence,
-    attack_type, features, flagged_features, method, scanned_at
+    attack_type, features, flagged_features, method, scanned_at, ip_info=None
 ) -> int | None:
     """Saves a scan and returns its database ID (used as the case number)."""
     if not DATABASE_URL:
@@ -83,15 +87,16 @@ def insert_scan(
                 """
                 INSERT INTO scans
                     (input, type, verdict, confidence, attack_type,
-                     features, flagged_features, method, scanned_at)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     features, flagged_features, method, scanned_at, ip_info)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
                 """,
                 (
-                    input_value, scan_type, verdict, confidence, attack_type,
+                    input_value, scan_type, verdict, float(confidence), attack_type,
                     json.dumps(features, default=str),
                     json.dumps(flagged_features),
                     method, scanned_at,
+                    json.dumps(ip_info, default=str) if ip_info else None,
                 ),
             )
             new_id = cur.fetchone()[0]
@@ -109,7 +114,7 @@ def get_recent_scans(limit: int = 20) -> list:
         cur.execute(
             """
             SELECT id, input, type, verdict, confidence, attack_type,
-                   features, flagged_features, scanned_at
+                   features, flagged_features, ip_info, scanned_at
             FROM scans
             ORDER BY scanned_at DESC
             LIMIT %s
@@ -140,3 +145,33 @@ def insert_feedback(scan_id: int, action: str) -> bool:
     except Exception as e:
         logger.warning(f'Failed to save feedback: {e}')
         return False
+
+
+def get_latest_action(input_value: str) -> dict | None:
+    """
+    Returns the most recent analyst decision for this input, or None.
+    Matches case-insensitively and ignores a trailing slash, so
+    'Example.com/' and 'example.com' count as the same indicator.
+    """
+    if not DATABASE_URL:
+        return None
+    try:
+        conn = _conn()
+        with conn, conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute(
+                """
+                SELECT f.action, f.scan_id, f.created_at
+                FROM feedback f
+                JOIN scans s ON s.id = f.scan_id
+                WHERE lower(rtrim(s.input, '/')) = lower(rtrim(%s, '/'))
+                ORDER BY f.created_at DESC, f.id DESC
+                LIMIT 1
+                """,
+                (input_value,),
+            )
+            row = cur.fetchone()
+        conn.close()
+        return dict(row) if row else None
+    except Exception as e:
+        logger.warning(f'Failed to look up analyst action: {e}')
+        return None

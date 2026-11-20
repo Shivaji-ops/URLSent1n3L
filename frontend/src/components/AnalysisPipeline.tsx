@@ -22,6 +22,8 @@ export interface AnalysisPipelineProps {
   bloom?: boolean;
   /** Scroll distance per stage, in viewport heights. */
   stageHeight?: number;
+  /** Opens the live URL checker; shown as a button in the HUD bar. */
+  onLiveAnalysis?: () => void;
 }
 
 /**
@@ -35,7 +37,8 @@ export function AnalysisPipeline({
   particleCount = 2600,
   trailLength = 0.5,
   bloom = true,
-  stageHeight = 1.4
+  stageHeight = 1.4,
+  onLiveAnalysis
 }: AnalysisPipelineProps) {
   const scroller = useRef<HTMLDivElement | null>(null);
   const spacer = useRef<HTMLDivElement | null>(null);
@@ -146,7 +149,11 @@ export function AnalysisPipeline({
           />
           <ViewfinderCorners />
 
-          <HudBar bus={bus} blockedSeed={analysis.exposure.blockedToday} />
+          <HudBar
+            bus={bus}
+            blockedSeed={analysis.exposure.blockedToday}
+            onLiveAnalysis={onLiveAnalysis}
+          />
 
           <NarrativeColumn bus={bus}>
             <AttackFeed routes={analysis.exposure.routes} />

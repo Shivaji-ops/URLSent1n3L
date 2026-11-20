@@ -19,7 +19,16 @@ const pill: CSSProperties = {
 };
 
 /** Top telemetry bar. Values tick imperatively from the progress bus. */
-export function HudBar({ bus, blockedSeed = 2874120 }: { bus: ProgressBus; blockedSeed?: number }) {
+export function HudBar({
+  bus,
+  blockedSeed = 2874120,
+  onLiveAnalysis
+}: {
+  bus: ProgressBus;
+  blockedSeed?: number;
+  /** When set, shows a "Live URL Analysis" button that calls it. */
+  onLiveAnalysis?: () => void;
+}) {
   const queue = useRef<HTMLSpanElement | null>(null);
   const blocked = useRef<HTMLSpanElement | null>(null);
   const status = useRef<HTMLSpanElement | null>(null);
@@ -102,6 +111,25 @@ export function HudBar({ bus, blockedSeed = 2874120 }: { bus: ProgressBus; block
           />
           <span ref={status}>INGEST</span>
         </div>
+        {onLiveAnalysis && (
+          <button
+            type="button"
+            onClick={onLiveAnalysis}
+            style={{
+              ...pill,
+              alignItems: 'center',
+              gap: 8,
+              fontWeight: 500,
+              color: color.text,
+              background: 'linear-gradient(135deg, oklch(70% 0.17 250 / 0.22), oklch(62% 0.17 300 / 0.22))',
+              border: '1px solid oklch(72% 0.13 255 / 0.45)',
+              cursor: 'pointer',
+              pointerEvents: 'auto'
+            }}
+          >
+            LIVE URL ANALYSIS <span aria-hidden>→</span>
+          </button>
+        )}
       </div>
     </header>
   );

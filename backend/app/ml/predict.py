@@ -78,7 +78,7 @@ def classify_url(raw_url: str) -> dict:
     pred   = _MODEL.predict(scaled)[0]
     proba  = _MODEL.predict_proba(scaled)[0]
     is_mal = pred == 1
-    conf   = round((proba[1] if is_mal else proba[0]) * 100, 1)
+    conf   = round(float(proba[1] if is_mal else proba[0]) * 100, 1)
 
     flagged = []
     if features['is_ip_host']:           flagged.append('is_ip_host')

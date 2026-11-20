@@ -5,7 +5,7 @@ URLSentinel — FastAPI Backend
 
 Endpoints:
   GET  /health      — liveness check
-  POST /analyze     — classify a URL or IP
+  POST /analyze     — classify a URL or IP (URLs are resolved and scored on their IP too)
   GET  /history     — recent scans from Neon PostgreSQL
   POST /feedback    — save analyst action (allow / block / escalate)
 
@@ -26,6 +26,7 @@ from pydantic import BaseModel
 
 from .ml.predict    import classify_url
 from .ip_analysis   import analyze_ip
+from .url_ip_fusion import enrich_url
 from .idn.idn_detector import detect as idn_detect
 from .              import database
 
@@ -91,6 +92,7 @@ def analyze(req: AnalyzeRequest):
             hostname   = urlparse(normalize_url(raw)).hostname or ''
             idn_result = idn_detect(hostname)
             result     = classify_url(raw)
+            result     = enrich_url(result, hostname)
             input_type = 'url'
 
             # Merge IDN findings if detected
@@ -108,6 +110,14 @@ def analyze(req: AnalyzeRequest):
         logger.error(f'Analysis error: {e}')
         raise HTTPException(status_code=500, detail=f'Analysis failed: {e}')
 
+    # An analyst decision outranks the model: once blocked, always reported as blocked
+    # until someone allows it again (the latest action wins).
+    prior = database.get_latest_action(raw)
+    if prior and prior['action'] == 'block':
+        result['verdict'] = 'Malicious'
+        result['method']  = 'analyst_block'
+        result['attack_type'] = result['attack_type'] or 'Blocked by analyst'
+
     scanned_at = datetime.now(timezone.utc)
 
     case_id = database.insert_scan(
@@ -120,6 +130,7 @@ def analyze(req: AnalyzeRequest):
         flagged_features=result['flagged_features'],
         method=result.get('method', 'model'),
         scanned_at=scanned_at,
+        ip_info=result.get('ip_info'),
     )
 
     return {
@@ -131,7 +142,14 @@ def analyze(req: AnalyzeRequest):
         'attack_type':      result['attack_type'],
         'features':         result['features'],
         'flagged_features': result['flagged_features'],
+        'ip_info':          result.get('ip_info'),
+        'risk':             result.get('risk'),
         'scanned_at':       scanned_at.isoformat(),
+        'analyst_action':   prior and {
+            'action':     prior['action'],
+            'case_id':    prior['scan_id'],
+            'decided_at': prior['created_at'].isoformat(),
+        },
     }
 
 

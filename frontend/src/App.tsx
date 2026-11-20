@@ -1,10 +1,11 @@
 import { useCallback, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AnalysisPipeline } from '@/components/AnalysisPipeline';
+import { LiveAnalysis } from '@/components/LiveAnalysis';
 import { Gateway } from '@/gateway/Gateway';
 import { MOCK_ANALYSIS } from '@/lib/mockAnalysis';
 
-type View = 'gateway' | 'pipeline';
+type View = 'gateway' | 'pipeline' | 'live';
 
 /**
  * Two views, no router: the gateway hands off to the pipeline.
@@ -24,6 +25,7 @@ type View = 'gateway' | 'pipeline';
 export default function App() {
   const [view, setView] = useState<View>('gateway');
   const enter = useCallback(() => setView('pipeline'), []);
+  const openLive = useCallback(() => setView('live'), []);
 
   return (
     <AnimatePresence mode="wait">
@@ -31,14 +33,25 @@ export default function App() {
         <motion.div key="gateway" exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
           <Gateway onEnter={enter} accent="threat-red" />
         </motion.div>
-      ) : (
+      ) : view === 'pipeline' ? (
         <motion.div
           key="pipeline"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
         >
-          <AnalysisPipeline analysis={MOCK_ANALYSIS} />
+          <AnalysisPipeline analysis={MOCK_ANALYSIS} onLiveAnalysis={openLive} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="live"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: 'easeOut' }}
+        >
+          <LiveAnalysis onBack={enter} />
         </motion.div>
       )}
     </AnimatePresence>
