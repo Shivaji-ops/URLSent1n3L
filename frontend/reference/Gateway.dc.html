@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+  <style>
+    body { margin: 0; background: #050505; overflow: hidden; }
+    *, *::before, *::after { box-sizing: border-box; }
+    a { color: rgba(255,255,255,0.72); text-decoration: none; }
+    a:hover { color: #ffffff; }
+    @keyframes gw-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.18; } }
+    @keyframes gw-drift { 0% { opacity: 0; transform: translateY(6px); } 100% { opacity: 1; transform: translateY(0); } }
+  </style>
+</helmet>
+
+<div ref="{{ rootRef }}" style="position: relative; width: 100vw; height: 100vh; background: #050505; overflow: hidden; cursor: none; font-family: 'JetBrains Mono', monospace; color: rgba(255,255,255,0.86);">
+
+  <canvas ref="{{ canvasRef }}" style="position: fixed; inset: 0; width: 100vw; height: 100vh; display: block;"></canvas>
+
+  <div ref="{{ glowRef }}" style="position: fixed; left: 50%; top: 50%; width: 780px; height: 780px; transform: translate(-50%, -50%); pointer-events: none; background: radial-gradient(circle, rgba(255,92,116,0.10) 0%, rgba(255,92,116,0.035) 34%, rgba(5,5,5,0) 66%);"></div>
+
+  <div ref="{{ warpRef }}" style="position: fixed; inset: 0; pointer-events: none; opacity: 0; background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0) 12%, rgba(150,190,255,0.10) 42%, rgba(255,255,255,0) 72%);"></div>
+
+  <div style="position: fixed; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 50%, rgba(5,5,5,0) 42%, rgba(5,5,5,0.55) 78%, rgba(5,5,5,0.92) 100%);"></div>
+
+  <div style="position: fixed; inset: 0; pointer-events: none; opacity: 0.035; background: repeating-linear-gradient(0deg, #ffffff 0px, #ffffff 1px, transparent 1px, transparent 3px);"></div>
+
+  <div ref="{{ uiRef }}" style="position: fixed; inset: 0; pointer-events: none;">
+
+    <div style="position: absolute; top: 30px; left: clamp(24px, 4vw, 52px); display: flex; align-items: center; gap: 11px; animation: gw-drift 900ms 200ms both ease-out;">
+      <div style="width: 20px; height: 20px; background: linear-gradient(150deg, #ff8a9b, #ff5c74); clip-path: polygon(50% 0%, 100% 20%, 100% 65%, 50% 100%, 0% 65%, 0% 20%);"></div>
+      <span style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 500; letter-spacing: 0.02em; color: rgba(255,255,255,0.82);">Triage Desk</span>
+    </div>
+
+    <div style="position: absolute; top: 26px; right: clamp(24px, 4vw, 52px); pointer-events: auto; animation: gw-drift 900ms 320ms both ease-out;">
+      <button ref="{{ ctaRef }}" onClick="{{ onCta }}" style="display: flex; align-items: center; gap: 12px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.09em; color: rgba(255,255,255,0.62); background: rgba(255,255,255,0.015); border: 1px solid rgba(255,255,255,0.14); border-radius: 3px; padding: 9px 15px; cursor: none; white-space: nowrap; outline: 1px solid transparent; outline-offset: 5px; transition: color 260ms ease, border-color 260ms ease, background 260ms ease, box-shadow 260ms ease;" style-focus="outline: 1px solid rgba(228,238,255,0.75); outline-offset: 3px; color: rgba(255,255,255,0.95); border-color: rgba(255,255,255,0.4);">
+        request access
+        <span ref="{{ ctaArrowRef }}" style="display: inline-block; transition: transform 320ms cubic-bezier(.2,.8,.2,1);">&#8594;</span>
+      </button>
+    </div>
+
+    <div style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: auto;">
+      <button ref="{{ nodeRef }}" onClick="{{ onUnlock }}" aria-label="Initialize Triage Desk" style="position: relative; width: 96px; height: 96px; border-radius: 50%; border: none; background: transparent; padding: 0; cursor: none; display: flex; align-items: center; justify-content: center; outline: 1px solid transparent; outline-offset: 10px;" style-focus="outline: 1px solid rgba(228,238,255,0.75); outline-offset: 8px;">
+        <span ref="{{ haloRef }}" style="position: absolute; inset: -30px; border-radius: 50%; background: radial-gradient(circle, rgba(220,235,255,0.16) 0%, rgba(220,235,255,0) 62%); opacity: 0; transition: opacity 380ms ease;"></span>
+        <span ref="{{ ring2Ref }}" style="position: absolute; inset: -1px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.10);"></span>
+        <span ref="{{ ringRef }}" style="position: absolute; inset: 12px; border-radius: 50%; background: rgba(228,238,255,0.055); border: 1px solid rgba(255,255,255,0.30); backdrop-filter: blur(3px); transition: transform 420ms cubic-bezier(.2,.8,.2,1), background 380ms ease, border-color 380ms ease, box-shadow 420ms ease;"></span>
+        <span ref="{{ triRef }}" style="position: relative; width: 0; height: 0; margin-left: 4px; border-top: 8px solid transparent; border-bottom: 8px solid transparent; border-left: 13px solid rgba(255,255,255,0.86); transition: border-left-color 380ms ease, transform 420ms cubic-bezier(.2,.8,.2,1);"></span>
+      </button>
+    </div>
+
+    <div ref="{{ termRef }}" style="position: absolute; left: 50%; top: calc(50% + 84px); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 7px; animation: gw-drift 1000ms 620ms both ease-out;">
+      <div style="font-size: 10.5px; letter-spacing: 0.16em; color: rgba(255,255,255,0.36); white-space: nowrap;">Triage Desk OS v1.0.4</div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span style="width: 5px; height: 5px; border-radius: 50%; background: #ff5c74; box-shadow: 0 0 8px rgba(255,92,116,0.8); animation: gw-blink 1.9s ease-in-out infinite;"></span>
+        <span ref="{{ statusRef }}" style="font-size: 10.5px; letter-spacing: 0.16em; color: rgba(255,138,155,0.72); white-space: nowrap;">System Armed</span>
+      </div>
+    </div>
+
+    <div style="position: absolute; bottom: 34px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; animation: gw-drift 1000ms 780ms both ease-out;">
+      <div style="font-size: 10.5px; letter-spacing: 0.08em; color: rgba(255,255,255,0.30); white-space: nowrap;">hello@triagedesk.com</div>
+      <div style="font-size: 10px; letter-spacing: 0.08em; color: rgba(255,255,255,0.16); white-space: nowrap;">&copy; 2026 Triage Desk Inc.</div>
+    </div>
+
+    <div style="position: absolute; bottom: 34px; left: clamp(24px, 4vw, 52px); font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.16); white-space: nowrap;">CLICK TO INITIALIZE</div>
+    <div ref="{{ latRef }}" style="position: absolute; bottom: 34px; right: clamp(24px, 4vw, 52px); font-size: 10px; letter-spacing: 0.14em; color: rgba(255,255,255,0.16); white-space: nowrap;">NODE 00 &middot; 11 ms</div>
+  </div>
+
+  <div ref="{{ veilRef }}" style="position: fixed; inset: 0; pointer-events: none; background: #ffffff; opacity: 0;"></div>
+
+  <div ref="{{ enteredRef }}" style="position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: #050505;">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center; padding: 0 24px;">
+      <div style="display: flex; align-items: center; gap: 9px;">
+        <span style="width: 5px; height: 5px; border-radius: 50%; background: #5cffa8; box-shadow: 0 0 9px rgba(92,255,168,0.85);"></span>
+        <span style="font-size: 10.5px; letter-spacing: 0.18em; color: rgba(140,255,196,0.8);">GATEWAY UNLOCKED</span>
+      </div>
+      <h1 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 4vw, 46px); font-weight: 500; letter-spacing: -0.02em; margin: 0; color: rgba(255,255,255,0.94);">Welcome to the desk.</h1>
+      <p style="font-size: 12px; line-height: 1.7; letter-spacing: 0.04em; color: rgba(255,255,255,0.42); margin: 0; max-width: 380px;">Five stages of indicator analysis, from global exposure to an explainable verdict.</p>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 6px;">
+        <a href="Threat%20Field%203D.dc.html" style="font-size: 11px; letter-spacing: 0.1em; color: #050505; background: rgba(255,255,255,0.94); border-radius: 3px; padding: 11px 20px; white-space: nowrap; outline: 1px solid transparent; outline-offset: 5px;" style-hover="background: #ffffff; color: #050505;" style-focus="outline: 1px solid rgba(228,238,255,0.75); outline-offset: 3px;">ENTER PIPELINE &#8594;</a>
+        <button onClick="{{ onRearm }}" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.1em; color: rgba(255,255,255,0.6); background: transparent; border: 1px solid rgba(255,255,255,0.16); border-radius: 3px; padding: 11px 20px; cursor: pointer; white-space: nowrap; outline: 1px solid transparent; outline-offset: 5px;" style-hover="color: rgba(255,255,255,0.95); border-color: rgba(255,255,255,0.4);" style-focus="outline: 1px solid rgba(228,238,255,0.75); outline-offset: 3px;">RE-ARM GATEWAY</button>
+      </div>
+    </div>
+  </div>
+
+  <div ref="{{ cursorRef }}" style="position: fixed; left: 0; top: 0; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.32); pointer-events: none; will-change: transform;"></div>
+  <div ref="{{ dotRef }}" style="position: fixed; left: 0; top: 0; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: #ffffff; pointer-events: none; will-change: transform;"></div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;accent&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Threat red&quot;,&quot;Signal cyan&quot;,&quot;Toxic green&quot;],&quot;default&quot;:&quot;Threat red&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;particleDensity&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:1100,&quot;min&quot;:200,&quot;max&quot;:3000,&quot;step&quot;:100,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Scene&quot;}}">
+class Component extends DCLogic {
+  static get THEMES() {
+    return {
+      'Threat red': { hand: 0xff5c74, tip: 0xff8fa2, dust: 0x9fb4e8, glow: '255,92,116' },
+      'Signal cyan': { hand: 0x4fd8ff, tip: 0x9be9ff, dust: 0x8fa8dc, glow: '79,216,255' },
+      'Toxic green': { hand: 0x5cff9e, tip: 0xa6ffcb, dust: 0x94c9b4, glow: '92,255,158' }
+    };
+  }
+
+  renderVals() {
+    return {
+      rootRef: el => { this.root = el; },
+      canvasRef: el => { this.canvas = el; },
+      glowRef: el => { this.glowEl = el; },
+      warpRef: el => { this.warpEl = el; },
+      veilRef: el => { this.veil = el; },
+      uiRef: el => { this.ui = el; },
+      enteredRef: el => { this.entered = el; },
+      cursorRef: el => { this.cursor = el; },
+      dotRef: el => { this.dot = el; },
+      nodeRef: el => { this.node = el; },
+      haloRef: el => { this.halo = el; },
+      ringRef: el => { this.ring = el; },
+      ring2Ref: el => { this.ring2 = el; },
+      triRef: el => { this.tri = el; },
+      termRef: el => { this.term = el; },
+      statusRef: el => { this.status = el; },
+      latRef: el => { this.lat = el; },
+      ctaRef: el => { this.cta = el; },
+      ctaArrowRef: el => { this.ctaArrow = el; },
+      onUnlock: () => this.unlock(),
+      onRearm: () => this.rearm(),
+      onCta: () => this.unlock()
+    };
+  }
+
+  theme() {
+    const T = Component.THEMES;
+    return T[this.props.accent] || T['Threat red'];
+  }
+
+  componentDidMount() {
+    this.reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    this.phase = 'idle';
+    this.t0 = performance.now();
+    this.warp = 0;
+    this.hover = 0;
+    this.pull = 0;
+    this.mouse = { x: 0, y: 0 };
+    this.cur = { x: 0, y: 0 };
+    this.dotPos = { x: 0, y: 0 };
+    this.parallax = { x: 0, y: 0 };
+
+    // Start the cursor centred, not at 0,0 — otherwise it sits in the corner
+    // until first move, and on touch devices it never moves at all.
+    this.mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+    this.cur = { x: this.mouse.x, y: this.mouse.y };
+    this.dotPos = { x: this.mouse.x, y: this.mouse.y };
+
+    this.touch = window.matchMedia && window.matchMedia('(hover: none)').matches;
+    if (this.touch) {
+      // No hover means no custom cursor: restore the native one.
+      if (this.root) this.root.style.cursor = 'auto';
+      if (this.node) this.node.style.cursor = 'pointer';
+      if (this.cta) this.cta.style.cursor = 'pointer';
+      if (this.cursor) this.cursor.style.display = 'none';
+      if (this.dot) this.dot.style.display = 'none';
+    }
+
+    this.onMove = e => { this.mouse.x = e.clientX; this.mouse.y = e.clientY; };
+    this.onResize = () => this.resize();
+    window.addEventListener('pointermove', this.onMove, { passive: true });
+    window.addEventListener('resize', this.onResize);
+
+    if (this.node) {
+      this.node.addEventListener('pointerenter', () => { this.hovering = true; });
+      this.node.addEventListener('pointerleave', () => { this.hovering = false; });
+      // Keyboard focus reuses the hover glow, so the node never looks inert.
+      this.node.addEventListener('focus', () => { this.focused = true; });
+      this.node.addEventListener('blur', () => { this.focused = false; });
+    }
+    if (this.cta) {
+      this.cta.addEventListener('pointerenter', () => this.ctaHover(true));
+      this.cta.addEventListener('pointerleave', () => this.ctaHover(false));
+    }
+
+    this.alive = true;
+    this.waitForThree();
+    this.loop();
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.accent !== this.props.accent) this.applyTheme();
+    if (prev.particleDensity !== this.props.particleDensity && this.THREE) this.buildDust();
+  }
+
+  componentWillUnmount() {
+    this.alive = false;
+    this.token++;
+    window.removeEventListener('pointermove', this.onMove);
+    window.removeEventListener('resize', this.onResize);
+    if (this.renderer) this.renderer.dispose();
+  }
+
+  waitForThree() {
+    const tick = () => {
+      if (!this.alive) return;
+      if (window.THREE) { this.THREE = window.THREE; this.initScene(); return; }
+      setTimeout(tick, 60);
+    };
+    tick();
+  }
+
+  /* ---------------------------------------------------------------- scene */
+
+  initScene() {
+    const T = this.THREE, C = this.canvas;
+    if (!C) return;
+    const th = this.theme();
+
+    // preserveDrawingBuffer keeps the frame readable after compositing, so the
+    // hero survives toDataURL — screenshots, snapshots and PDF export.
+    this.renderer = new T.WebGLRenderer({
+      canvas: C, antialias: true, alpha: false, preserveDrawingBuffer: true
+    });
+    this.renderer.setClearColor(0x050505, 1);
+    this.scene = new T.Scene();
+    this.scene.fog = new T.Fog(0x050505, 3.4, 13.5);
+    this.camera = new T.PerspectiveCamera(42, 1, 0.1, 100);
+    this.camera.position.set(0, 0, 7);
+
+    // Wireframe materials read as light themselves; point lights add falloff
+    // on the joint spheres so the structure has volume near the fingertip.
+    this.scene.add(new T.AmbientLight(0xffffff, 0.35));
+    this.keyLight = new T.PointLight(th.hand, 2.6, 9, 2);
+    this.keyLight.position.set(-0.6, 0.5, 1.8);
+    this.scene.add(this.keyLight);
+    this.rimLight = new T.PointLight(0xc8dcff, 1.4, 12, 2);
+    this.rimLight.position.set(2.4, -1.2, 2.4);
+    this.scene.add(this.rimLight);
+
+    this.buildHand();
+    this.buildDust();
+    this.resize();
+  }
+
+  /** Tapered wireframe segment between two points, plus a joint sphere. */
+  limb(pts, radii, mat, group) {
+    const T = this.THREE;
+    const up = new T.Vector3(0, 1, 0);
+    for (let i = 0; i < pts.length - 1; i++) {
+      const a = new T.Vector3().fromArray(pts[i]);
+      const b = new T.Vector3().fromArray(pts[i + 1]);
+      const dir = new T.Vector3().subVectors(b, a);
+      const len = dir.length();
+      if (len < 1e-4) continue;
+      const g = new T.CylinderGeometry(radii[i + 1], radii[i], len, 8, 2, true);
+      const m = new T.Mesh(g, mat);
+      m.quaternion.setFromUnitVectors(up, dir.clone().normalize());
+      m.position.copy(a).addScaledVector(dir, 0.5);
+      group.add(m);
+
+      // Knuckles only. On wrist-scale radii a sphere reads as a robot joint.
+      if (i > 0 && radii[i] < 0.16) {
+        const j = new T.Mesh(new T.SphereGeometry(radii[i] * 1.04, 8, 6), mat);
+        j.position.copy(a);
+        group.add(j);
+      }
+    }
+  }
+
+  buildHand() {
+    const T = this.THREE, th = this.theme();
+    if (this.hand) this.scene.remove(this.hand);
+
+    this.handMat = new T.MeshBasicMaterial({
+      color: th.hand, wireframe: true, transparent: true, opacity: 0.62, fog: true
+    });
+    // The pointing finger is the same material family, only lifted — a pale
+    // tip would graft on as a separate object.
+    this.tipMat = new T.MeshBasicMaterial({
+      color: th.tip, wireframe: true, transparent: true, opacity: 0.8, fog: true
+    });
+
+    const g = new T.Group();
+
+    // Index finger, extended toward the node. Fingertip sits at the origin.
+    this.limb(
+      [[0, 0, 0], [-0.40, -0.015, 0.01], [-0.82, -0.05, 0.02], [-1.26, -0.11, 0.04]],
+      [0.062, 0.084, 0.098, 0.112], this.tipMat, g
+    );
+
+    // Curled fingers: forward, down, then back under the palm.
+    const curl = (x, z, s) => [
+      [x, -0.30 * s, z], [x + 0.42 * s, -0.42 * s, z + 0.04], [x + 0.48 * s, -0.72 * s, z + 0.06], [x + 0.22 * s, -0.88 * s, z + 0.04]
+    ];
+    this.limb(curl(-1.30, 0.21, 1), [0.098, 0.086, 0.076, 0.066], this.handMat, g);
+    this.limb(curl(-1.35, 0.45, 0.94), [0.092, 0.081, 0.071, 0.062], this.handMat, g);
+    this.limb(curl(-1.43, 0.65, 0.82), [0.079, 0.070, 0.061, 0.054], this.handMat, g);
+
+    // Thumb, angled toward the viewer.
+    this.limb(
+      [[-1.74, -0.32, -0.20], [-1.32, -0.50, -0.33], [-1.00, -0.72, -0.40], [-0.84, -0.88, -0.43]],
+      [0.135, 0.112, 0.093, 0.078], this.handMat, g
+    );
+
+    // Palm: lofted along the hand axis and squashed in Z. A primitive box or
+    // cylinder reads as a slab; a taper chain keeps the knuckle mass organic.
+    const palmWrap = new T.Group();
+    this.limb(
+      [[-1.32, -0.14, 0.24], [-1.62, -0.17, 0.24], [-1.98, -0.21, 0.23], [-2.30, -0.26, 0.20]],
+      [0.40, 0.455, 0.44, 0.335], this.handMat, palmWrap
+    );
+    palmWrap.scale.z = 0.6;
+    palmWrap.rotation.y = -0.05;
+    g.add(palmWrap);
+
+    // Wrist and forearm recede into the fog.
+    const arm = new T.Group();
+    this.limb(
+      [[-2.32, -0.28, 0.18], [-3.1, -0.36, 0.12], [-4.6, -0.5, 0.0], [-6.6, -0.66, -0.16]],
+      [0.30, 0.33, 0.36, 0.36], this.handMat, arm
+    );
+    arm.scale.z = 0.84;
+    g.add(arm);
+
+    // Fingertip is the group origin, so position IS the tip — park it just
+    // short of the node so the gap reads as charged, not empty.
+    g.position.set(-0.66, 0.02, 0);
+    g.rotation.y = -0.22;
+    g.rotation.z = 0.05;
+    g.scale.setScalar(1.28);
+    this.hand = g;
+    this.scene.add(g);
+    this.handHome = { x: g.position.x, y: g.position.y };
+  }
+
+  buildDust() {
+    const T = this.THREE;
+    if (this.dust) { this.scene.remove(this.dust); this.dust.geometry.dispose(); }
+    const N = Math.max(200, Math.min(3000, Math.round(this.props.particleDensity ?? 1100)));
+    const pos = new Float32Array(N * 3);
+    this.dustVel = new Float32Array(N);
+    let seed = 7717;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let i = 0; i < N; i++) {
+      pos[i * 3] = (rnd() - 0.5) * 34;
+      pos[i * 3 + 1] = (rnd() - 0.5) * 20;
+      pos[i * 3 + 2] = (rnd() - 0.5) * 26 - 4;
+      this.dustVel[i] = 0.1 + rnd() * 0.5;
+    }
+    const geo = new T.BufferGeometry();
+    geo.setAttribute('position', new T.BufferAttribute(pos, 3));
+    this.dust = new T.Points(geo, new T.PointsMaterial({
+      color: this.theme().dust, size: 0.026, sizeAttenuation: true,
+      transparent: true, opacity: 0.55, depthWrite: false, fog: true
+    }));
+    this.scene.add(this.dust);
+  }
+
+  applyTheme() {
+    const th = this.theme();
+    if (this.handMat) this.handMat.color.setHex(th.hand);
+    if (this.tipMat) this.tipMat.color.setHex(th.tip);
+    if (this.keyLight) this.keyLight.color.setHex(th.hand);
+    if (this.dust) this.dust.material.color.setHex(th.dust);
+    if (this.glowEl) {
+      this.glowEl.style.background =
+        'radial-gradient(circle, rgba(' + th.glow + ',0.10) 0%, rgba(' + th.glow + ',0.035) 34%, rgba(5,5,5,0) 66%)';
+    }
+  }
+
+  resize() {
+    if (!this.renderer || !this.canvas) return;
+    const w = window.innerWidth, h = window.innerHeight;
+    this.renderer.setPixelRatio(Math.min(1.75, window.devicePixelRatio || 1));
+    this.renderer.setSize(w, h, false);
+    this.camera.aspect = w / h;
+    // Keep the fingertip clear of the node on narrow viewports.
+    this.camera.position.z = w < 900 ? 8.6 : 7;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /* --------------------------------------------------------- interaction */
+
+  ctaHover(on) {
+    if (!this.cta) return;
+    this.cta.style.color = on ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.62)';
+    this.cta.style.borderColor = on ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.14)';
+    this.cta.style.background = on ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.015)';
+    this.cta.style.boxShadow = on ? '0 0 22px rgba(255,255,255,0.07)' : 'none';
+    if (this.ctaArrow) this.ctaArrow.style.transform = on ? 'translateX(4px)' : 'translateX(0)';
+  }
+
+  unlock() {
+    if (this.phase !== 'idle') return;
+    this.phase = 'unlocking';
+    this.unlockAt = performance.now();
+    if (this.status) {
+      this.status.textContent = 'Initializing\u2026';
+      this.status.style.color = 'rgba(255,255,255,0.8)';
+    }
+    if (this.reduce) {
+      // No warp for reduced motion — go straight through.
+      setTimeout(() => this.finish(), 260);
+    }
+  }
+
+  finish() {
+    this.phase = 'entered';
+    if (this.entered) this.entered.style.display = 'flex';
+    if (this.root) this.root.style.cursor = 'auto';
+    if (this.cursor) this.cursor.style.opacity = '0';
+    if (this.dot) this.dot.style.opacity = '0';
+  }
+
+  // Re-arm must not restore a custom cursor on touch devices.
+
+  rearm() {
+    this.phase = 'idle';
+    this.warp = 0;
+    this.unlockAt = 0;
+    if (this.entered) this.entered.style.display = 'none';
+    if (this.veil) this.veil.style.opacity = '0';
+    if (this.ui) { this.ui.style.opacity = '1'; this.ui.style.filter = 'none'; }
+    if (!this.touch) {
+      if (this.root) this.root.style.cursor = 'none';
+      if (this.cursor) this.cursor.style.opacity = '1';
+      if (this.dot) this.dot.style.opacity = '1';
+    }
+    if (this.status) {
+      this.status.textContent = 'System Armed';
+      this.status.style.color = 'rgba(255,138,155,0.72)';
+    }
+    if (this.camera) this.camera.position.z = window.innerWidth < 900 ? 8.6 : 7;
+    if (this.scene) this.scene.fog.far = 13.5;
+  }
+
+  /* ---------------------------------------------------------------- loop */
+
+  loop() {
+    this.token = (this.token || 0) + 1;
+    const mine = this.token;
+    const run = now => {
+      if (!this.alive || mine !== this.token) return;
+      this.frame(now);
+      requestAnimationFrame(run);
+    };
+    requestAnimationFrame(run);
+  }
+
+  frame(now) {
+    const t = (now - this.t0) / 1000;
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+
+    /* --- magnetic cursor: target bends toward the node inside its field --- */
+    let tx = this.mouse.x, ty = this.mouse.y;
+    const dx = this.mouse.x - cx, dy = this.mouse.y - cy;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const FIELD = 190;
+    const inField = dist < FIELD;
+    const mag = inField ? Math.pow(1 - dist / FIELD, 1.6) : 0;
+    this.pull += (mag - this.pull) * 0.16;
+    if (this.pull > 0.001) {
+      tx = this.mouse.x - dx * this.pull * 0.62;
+      ty = this.mouse.y - dy * this.pull * 0.62;
+    }
+    this.cur.x += (tx - this.cur.x) * 0.19;
+    this.cur.y += (ty - this.cur.y) * 0.19;
+    this.dotPos.x += (this.mouse.x - this.dotPos.x) * 0.42;
+    this.dotPos.y += (this.mouse.y - this.dotPos.y) * 0.42;
+
+    const near = this.hovering || this.focused || this.pull > 0.35;
+    this.hover += ((near ? 1 : 0) - this.hover) * 0.12;
+
+    if (this.cursor && !this.touch) {
+      const s = 1 + this.hover * 0.85;
+      this.cursor.style.transform = 'translate(' + this.cur.x.toFixed(1) + 'px,' + this.cur.y.toFixed(1) + 'px) scale(' + s.toFixed(3) + ')';
+      this.cursor.style.borderColor = 'rgba(255,255,255,' + (0.32 + this.hover * 0.42).toFixed(3) + ')';
+    }
+    if (this.dot && !this.touch) {
+      this.dot.style.transform = 'translate(' + this.dotPos.x.toFixed(1) + 'px,' + this.dotPos.y.toFixed(1) + 'px) scale(' + (1 - this.hover * 0.5).toFixed(3) + ')';
+    }
+
+    /* --- node reacts to proximity, not just true hover --- */
+    if (this.ring) {
+      this.ring.style.transform = 'scale(' + (1 + this.hover * 0.16).toFixed(4) + ')';
+      this.ring.style.background = 'rgba(228,238,255,' + (0.055 + this.hover * 0.09).toFixed(3) + ')';
+      this.ring.style.borderColor = 'rgba(255,255,255,' + (0.3 + this.hover * 0.55).toFixed(3) + ')';
+      this.ring.style.boxShadow = '0 0 ' + (18 + this.hover * 46).toFixed(0) + 'px rgba(210,228,255,' + (this.hover * 0.34).toFixed(3) + ')';
+    }
+    if (this.halo) this.halo.style.opacity = this.hover.toFixed(3);
+    if (this.tri) this.tri.style.transform = 'scale(' + (1 + this.hover * 0.14).toFixed(3) + ')';
+    if (this.ring2) {
+      const b = 0.10 + 0.05 * Math.sin(t * 1.6) + this.hover * 0.2;
+      this.ring2.style.borderColor = 'rgba(255,255,255,' + b.toFixed(3) + ')';
+      this.ring2.style.transform = 'scale(' + (1 + 0.012 * Math.sin(t * 1.6)).toFixed(4) + ')';
+    }
+    if (this.lat && now - (this.latAt || 0) > 900) {
+      this.latAt = now;
+      this.lat.textContent = 'NODE 00 \u00b7 ' + (9 + Math.floor(Math.random() * 5)) + ' ms';
+    }
+
+    /* --- unlock sequence --- */
+    let seq = 0;
+    if (this.phase === 'unlocking') {
+      seq = Math.min(1, (now - this.unlockAt) / 1300);
+      this.warp += (1 - this.warp) * 0.07;
+      const ease = seq * seq;
+      if (this.ui) {
+        this.ui.style.opacity = Math.max(0, 1 - seq * 1.9).toFixed(3);
+        this.ui.style.filter = 'blur(' + (seq * 5).toFixed(1) + 'px)';
+      }
+      if (this.warpEl) this.warpEl.style.opacity = (Math.sin(Math.min(1, seq * 1.4) * Math.PI) * 0.9).toFixed(3);
+      if (this.veil) this.veil.style.opacity = Math.max(0, (seq - 0.62) / 0.38).toFixed(3);
+      if (this.camera) this.camera.position.z -= ease * 0.34;
+      if (this.scene) this.scene.fog.far = 13.5 - ease * 7.5;
+      if (seq >= 1) this.finish();
+    } else if (this.phase === 'idle') {
+      this.warp += (0 - this.warp) * 0.06;
+      if (this.warpEl && this.warp < 0.01) this.warpEl.style.opacity = '0';
+    }
+
+    if (!this.renderer) return;
+
+    /* --- camera parallax --- */
+    const px = (this.mouse.x / window.innerWidth - 0.5);
+    const py = (this.mouse.y / window.innerHeight - 0.5);
+    this.parallax.x += (px * 0.42 - this.parallax.x) * 0.045;
+    this.parallax.y += (-py * 0.28 - this.parallax.y) * 0.045;
+    this.camera.position.x = this.parallax.x;
+    this.camera.position.y = this.parallax.y;
+    this.camera.lookAt(0, 0, 0);
+
+    /* --- hand: idle breathing, then recoil on unlock --- */
+    if (this.hand) {
+      const breathe = this.reduce ? 0 : Math.sin(t * 0.5) * 0.022;
+      const recoil = seq * seq * 2.6;
+      this.hand.position.x = this.handHome.x - recoil;
+      this.hand.position.y = this.handHome.y + breathe + Math.sin(t * 0.37) * 0.014;
+      this.hand.rotation.y = -0.22 + Math.sin(t * 0.28) * 0.03 + this.parallax.x * 0.1;
+      const o = Math.max(0, 1 - seq * 1.5);
+      this.handMat.opacity = 0.62 * o;
+      this.tipMat.opacity = (0.9 - this.hover * 0.06) * o;
+    }
+    if (this.keyLight) {
+      this.keyLight.intensity = (2.6 + this.hover * 1.6) * Math.max(0, 1 - seq * 1.4);
+    }
+
+    /* --- dust: slow drift, then warp toward the camera --- */
+    if (this.dust) {
+      const arr = this.dust.geometry.attributes.position.array;
+      const boost = 1 + this.warp * 46;
+      for (let i = 0; i < this.dustVel.length; i++) {
+        arr[i * 3 + 2] += this.dustVel[i] * 0.006 * boost;
+        if (arr[i * 3 + 2] > 9) arr[i * 3 + 2] -= 34;
+      }
+      this.dust.geometry.attributes.position.needsUpdate = true;
+      this.dust.material.size = 0.026 + this.warp * 0.05;
+      this.dust.material.opacity = 0.55 + this.warp * 0.4;
+      this.dust.rotation.y = t * 0.006;
+    }
+
+    this.renderer.render(this.scene, this.camera);
+  }
+}
+</script>
+</body>
+</html>

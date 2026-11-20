@@ -1,0 +1,2072 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    body { margin: 0; background: oklch(12% 0.015 260); }
+    *, *::before, *::after { box-sizing: border-box; }
+    a { color: oklch(78% 0.13 255); text-decoration: none; }
+    a:hover { color: oklch(86% 0.11 255); }
+    @keyframes tf-pulse { 0%, 100% { opacity: 0.35; transform: translateY(0); } 50% { opacity: 1; transform: translateY(4px); } }
+    @keyframes tf-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+  </style>
+</helmet>
+
+<div ref="{{ scrollRef }}" style="height: 100vh; overflow-y: auto; overflow-x: hidden; background: oklch(12% 0.015 260); color: oklch(94% 0.008 260); font-family: 'Manrope', sans-serif;">
+
+  <div style="position: relative; height: 560vh;">
+
+    <div style="position: sticky; top: 0; height: 100vh; overflow: hidden;">
+
+      <canvas ref="{{ canvasRef }}" onPointerDown="{{ onDown }}" onPointerMove="{{ onMove }}" onPointerUp="{{ onUp }}" onPointerLeave="{{ onUp }}" style="position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: pan-y;"></canvas>
+
+      <div style="position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 35%, oklch(10% 0.015 265 / 0.55) 78%, oklch(9% 0.015 265 / 0.9) 100%);"></div>
+      <div style="position: absolute; inset: 0; pointer-events: none; background-image: linear-gradient(oklch(100% 0 0 / 0.022) 1px, transparent 1px), linear-gradient(90deg, oklch(100% 0 0 / 0.022) 1px, transparent 1px); background-size: 68px 68px; mask-image: radial-gradient(80% 70% at 50% 50%, black, transparent 85%);"></div>
+      <div style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(90deg, oklch(9% 0.015 265 / 0.93) 0%, oklch(9% 0.015 265 / 0.88) 32%, oklch(9% 0.015 265 / 0.6) 52%, oklch(9% 0.015 265 / 0.22) 66%, oklch(9% 0.015 265 / 0) 78%);"></div>
+      <div style="position: absolute; inset: 0; pointer-events: none; opacity: 0.045; background: repeating-linear-gradient(0deg, oklch(100% 0 0) 0px, oklch(100% 0 0) 1px, transparent 1px, transparent 3px);"></div>
+      <div style="position: absolute; inset: 14px; pointer-events: none;">
+        <div style="position: absolute; left: 0; top: 0; width: 24px; height: 24px; border-left: 1px solid oklch(100% 0 0 / 0.16); border-top: 1px solid oklch(100% 0 0 / 0.16);"></div>
+        <div style="position: absolute; right: 0; top: 0; width: 24px; height: 24px; border-right: 1px solid oklch(100% 0 0 / 0.16); border-top: 1px solid oklch(100% 0 0 / 0.16);"></div>
+        <div style="position: absolute; left: 0; bottom: 0; width: 24px; height: 24px; border-left: 1px solid oklch(100% 0 0 / 0.16); border-bottom: 1px solid oklch(100% 0 0 / 0.16);"></div>
+        <div style="position: absolute; right: 0; bottom: 0; width: 24px; height: 24px; border-right: 1px solid oklch(100% 0 0 / 0.16); border-bottom: 1px solid oklch(100% 0 0 / 0.16);"></div>
+      </div>
+
+      <div style="position: absolute; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 26px clamp(20px, 4vw, 56px); pointer-events: none;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 26px; height: 26px; background: linear-gradient(145deg, oklch(70% 0.17 250), oklch(62% 0.17 300)); clip-path: polygon(50% 0%, 100% 20%, 100% 65%, 50% 100%, 0% 65%, 0% 20%);"></div>
+          <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; letter-spacing: 0.01em;">Triage Desk</span>
+          <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.12em; color: oklch(62% 0.02 260); border-left: 1px solid oklch(100% 0 0 / 0.14); padding-left: 12px;">INDICATOR&nbsp;FIELD</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end;">
+          <div style="display: flex; align-items: baseline; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: oklch(64% 0.02 260); background: oklch(100% 0 0 / 0.04); border: 1px solid oklch(100% 0 0 / 0.08); border-radius: 100px; padding: 6px 13px; white-space: nowrap;">
+            QUEUE <span ref="{{ nodesRef }}" style="color: oklch(92% 0.008 260);">0</span>
+          </div>
+          <div style="display: flex; align-items: baseline; gap: 7px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: oklch(64% 0.02 260); background: oklch(100% 0 0 / 0.04); border: 1px solid oklch(100% 0 0 / 0.08); border-radius: 100px; padding: 6px 13px; white-space: nowrap;">
+            BLOCKED <span ref="{{ blockedRef }}" style="color: oklch(80% 0.14 145);">0</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.04em; color: oklch(64% 0.02 260); background: oklch(100% 0 0 / 0.04); border: 1px solid oklch(100% 0 0 / 0.08); border-radius: 100px; padding: 6px 13px; white-space: nowrap;">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: oklch(78% 0.16 145); animation: tf-blink 1.6s ease-in-out infinite;"></span>
+            <span ref="{{ stateRef }}">INGEST</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="position: absolute; left: clamp(20px, 4vw, 56px); top: 88px; bottom: 86px; width: min(430px, 46vw); pointer-events: none;">
+
+        <div ref="{{ p1 }}" style="position: absolute; left: 0; top: 50%; width: 100%; transform: translateY(-50%); opacity: 1;">
+          <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(72% 0.13 255); margin-bottom: clamp(10px, 1.8vh, 18px);">
+            <span style="width: 22px; height: 1px; background: oklch(65% 0.15 255);"></span>01 &nbsp;EXPOSURE
+          </div>
+          <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(23px, 2.4vh + 0.8vw, 42px); line-height: 1.1; letter-spacing: -0.015em; font-weight: 600; margin: 0 0 clamp(10px, 1.8vh, 18px); text-wrap: pretty;">A blocklist always arrives late.</h2>
+          <p style="font-size: clamp(13px, 1.55vh, 15px); line-height: 1.6; color: oklch(72% 0.015 260); margin: 0 0 clamp(14px, 2.6vh, 26px); max-width: 385px; text-wrap: pretty;">Malicious domains are registered by the thousand and live for hours. A database of known-bad URLs can only describe yesterday's campaigns &mdash; every fresh domain enters the world unlisted, and trusted.</p>
+          <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(100% 0 0 / 0.08); border-radius: 10px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">NEW DOMAINS / DAY</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;">200 K+</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">CAMPAIGN LIFESPAN</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;">&lt; 24 h</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">SIGNATURE COVERAGE</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; color: oklch(72% 0.16 30);">Reactive only</span>
+            </div>
+          </div>
+
+          <div ref="{{ feedRef }}" style="margin-top: clamp(8px, 1.4vh, 14px); border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; overflow: hidden; background: oklch(14% 0.015 262 / 0.55);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 7px 13px; border-bottom: 1px solid oklch(100% 0 0 / 0.08);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.14em; color: oklch(64% 0.02 260); white-space: nowrap;">LIVE ATTACK FEED</span>
+              <span style="width: 5px; height: 5px; border-radius: 50%; background: oklch(70% 0.19 22); animation: tf-blink 1.4s ease-in-out infinite;"></span>
+            </div>
+            <div ref="{{ fr0 }}" style="display: flex; align-items: center; gap: 10px; padding: 5px 13px;">
+              <span style="width: 4px; height: 4px; border-radius: 50%; background: oklch(70% 0.19 22); flex-shrink: 0;"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(92% 0.008 260); width: 64px; flex-shrink: 0; white-space: nowrap;">&mdash;</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(66% 0.02 260); white-space: nowrap;">&mdash;</span>
+            </div>
+            <div ref="{{ fr1 }}" style="display: flex; align-items: center; gap: 10px; padding: 5px 13px;">
+              <span style="width: 4px; height: 4px; border-radius: 50%; background: oklch(70% 0.19 22); flex-shrink: 0;"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(92% 0.008 260); width: 64px; flex-shrink: 0; white-space: nowrap;">&mdash;</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(66% 0.02 260); white-space: nowrap;">&mdash;</span>
+            </div>
+            <div ref="{{ fr2 }}" style="display: flex; align-items: center; gap: 10px; padding: 5px 13px;">
+              <span style="width: 4px; height: 4px; border-radius: 50%; background: oklch(70% 0.19 22); flex-shrink: 0;"></span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(92% 0.008 260); width: 64px; flex-shrink: 0; white-space: nowrap;">&mdash;</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(66% 0.02 260); white-space: nowrap;">&mdash;</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ p2 }}" style="position: absolute; left: 0; top: 50%; width: 100%; transform: translateY(-50%); opacity: 0;">
+          <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(72% 0.13 255); margin-bottom: clamp(10px, 1.8vh, 18px);">
+            <span style="width: 22px; height: 1px; background: oklch(65% 0.15 255);"></span>02 &nbsp;EXTRACTION
+          </div>
+          <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(23px, 2.4vh + 0.8vw, 42px); line-height: 1.1; letter-spacing: -0.015em; font-weight: 600; margin: 0 0 clamp(10px, 1.8vh, 18px); text-wrap: pretty;">Nineteen features, no list required.</h2>
+          <p style="font-size: clamp(13px, 1.55vh, 15px); line-height: 1.6; color: oklch(72% 0.015 260); margin: 0 0 clamp(12px, 2.2vh, 22px); max-width: 385px; text-wrap: pretty;">Each indicator flattens into a lexical vector &mdash; length, entropy, token depth, digit and symbol ratios, keyword signals, host shape. A Random Forest, selected over three competing models, scores it as it arrives.</p>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: clamp(12px, 2vh, 20px);">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(74% 0.015 260); background: oklch(100% 0 0 / 0.05); border: 1px solid oklch(100% 0 0 / 0.09); padding: 4px 9px; border-radius: 100px; white-space: nowrap;">url_length</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(74% 0.015 260); background: oklch(100% 0 0 / 0.05); border: 1px solid oklch(100% 0 0 / 0.09); padding: 4px 9px; border-radius: 100px; white-space: nowrap;">entropy</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(74% 0.015 260); background: oklch(100% 0 0 / 0.05); border: 1px solid oklch(100% 0 0 / 0.09); padding: 4px 9px; border-radius: 100px; white-space: nowrap;">subdomain_depth</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(74% 0.015 260); background: oklch(100% 0 0 / 0.05); border: 1px solid oklch(100% 0 0 / 0.09); padding: 4px 9px; border-radius: 100px; white-space: nowrap;">digit_ratio</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(74% 0.015 260); background: oklch(100% 0 0 / 0.05); border: 1px solid oklch(100% 0 0 / 0.09); padding: 4px 9px; border-radius: 100px; white-space: nowrap;">has_at_symbol</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; color: oklch(60% 0.02 260); padding: 4px 4px; white-space: nowrap;">+14</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(100% 0 0 / 0.08); border-radius: 10px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">MODELS EVALUATED</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;">4</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">DATASET BIASES CORRECTED</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;">3</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ p3 }}" style="position: absolute; left: 0; top: 50%; width: 100%; transform: translateY(-50%); opacity: 0;">
+          <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(70% 0.17 20); margin-bottom: clamp(10px, 1.8vh, 18px);">
+            <span style="width: 22px; height: 1px; background: oklch(65% 0.19 22);"></span>03 &nbsp;HOMOGRAPH
+          </div>
+          <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(23px, 2.4vh + 0.8vw, 42px); line-height: 1.1; letter-spacing: -0.015em; font-weight: 600; margin: 0 0 clamp(10px, 1.8vh, 18px); text-wrap: pretty;">One character no matcher can see.</h2>
+          <p style="font-size: clamp(13px, 1.55vh, 15px); line-height: 1.6; color: oklch(72% 0.015 260); margin: 0 0 clamp(12px, 2.2vh, 22px); max-width: 385px; text-wrap: pretty;">An IDN homograph swaps a Latin glyph for a visually identical Unicode codepoint. The string matches nothing on any list, and reads as legitimate to the human eye.</p>
+          <div style="border: 1px solid oklch(100% 0 0 / 0.1); border-radius: 12px; overflow: hidden; background: oklch(15% 0.015 262);">
+            <div style="display: flex; align-items: center; gap: 12px; padding: clamp(8px, 1.5vh, 13px) 14px; border-bottom: 1px solid oklch(100% 0 0 / 0.07);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: oklch(60% 0.02 260); width: 62px; flex-shrink: 0;">INPUT</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: oklch(92% 0.008 260);"><span style="color: oklch(70% 0.19 22); background: oklch(50% 0.16 22 / 0.22); border-radius: 3px; padding: 0 2px;">&#1072;</span>pple-id-verify.com</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: clamp(8px, 1.5vh, 13px) 14px; border-bottom: 1px solid oklch(100% 0 0 / 0.07);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: oklch(60% 0.02 260); width: 62px; flex-shrink: 0;">GLYPH</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11.5px; color: oklch(74% 0.015 260);">U+0430 CYRILLIC SMALL A &nbsp;&ne;&nbsp; U+0061</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; padding: clamp(8px, 1.5vh, 13px) 14px; border-bottom: 1px solid oklch(100% 0 0 / 0.07);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: oklch(60% 0.02 260); width: 62px; flex-shrink: 0;">SKELETON</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 14px; color: oklch(84% 0.15 148);">apple-id-verify.com</span>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(17% 0.02 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: oklch(58% 0.02 260); white-space: nowrap;">CONFUSABLES: UNICODE CONSORTIUM</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.06em; color: oklch(74% 0.18 22); white-space: nowrap;">VERDICT: brand impersonation</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ p4 }}" style="position: absolute; left: 0; top: 50%; width: 100%; transform: translateY(-50%); opacity: 0;">
+          <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(72% 0.14 300); margin-bottom: clamp(10px, 1.8vh, 18px);">
+            <span style="width: 22px; height: 1px; background: oklch(66% 0.16 300);"></span>04 &nbsp;ENRICHMENT
+          </div>
+          <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(23px, 2.4vh + 0.8vw, 42px); line-height: 1.1; letter-spacing: -0.015em; font-weight: 600; margin: 0 0 clamp(10px, 1.8vh, 18px); text-wrap: pretty;">Four evidence streams, one verdict.</h2>
+          <p style="font-size: clamp(13px, 1.55vh, 15px); line-height: 1.6; color: oklch(72% 0.015 260); margin: 0 0 clamp(14px, 2.6vh, 26px); max-width: 385px; text-wrap: pretty;">The lexical score is corroborated: IP reputation with proxy and hosting detection, WHOIS domain age, and page content read for credential-harvesting indicators. Every verdict ships with the evidence that produced it.</p>
+          <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(100% 0 0 / 0.08); border-radius: 10px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">IP REPUTATION</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 600; color: oklch(74% 0.18 22);">Hosting / proxy</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">WHOIS DOMAIN AGE</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 600;">6 hours</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">PAGE CONTENT</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 600;">Credential form</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(17% 0.02 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">CONFIDENCE</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 600; color: oklch(84% 0.15 148);">0.96</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ p5 }}" style="position: absolute; left: 0; top: 50%; width: 100%; transform: translateY(-50%); opacity: 0;">
+          <div style="display: flex; align-items: center; gap: 10px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(78% 0.15 148); margin-bottom: clamp(10px, 1.8vh, 18px);">
+            <span style="width: 22px; height: 1px; background: oklch(70% 0.16 148);"></span>05 &nbsp;DECISION
+          </div>
+          <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(23px, 2.4vh + 0.8vw, 42px); line-height: 1.1; letter-spacing: -0.015em; font-weight: 600; margin: 0 0 clamp(10px, 1.8vh, 18px); text-wrap: pretty;">The analyst closes the loop.</h2>
+          <p style="font-size: clamp(13px, 1.55vh, 15px); line-height: 1.6; color: oklch(72% 0.015 260); margin: 0 0 clamp(12px, 2.2vh, 22px); max-width: 385px; text-wrap: pretty;">Allow, Block or Escalate is written back as labelled ground truth. The active-learning set grows with every decision, and the model is retrained against the threats analysts actually see.</p>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: clamp(12px, 2vh, 20px);">
+            <span style="font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 600; color: oklch(74% 0.015 260); border: 1px solid oklch(100% 0 0 / 0.12); border-radius: 100px; padding: 7px 15px; white-space: nowrap;">Allow</span>
+            <span style="font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 600; color: oklch(20% 0.02 150); background: oklch(84% 0.15 148); border: 1px solid transparent; border-radius: 100px; padding: 7px 15px; white-space: nowrap;">Block &nbsp;&#10003;</span>
+            <span style="font-family: 'Manrope', sans-serif; font-size: 12.5px; font-weight: 600; color: oklch(74% 0.015 260); border: 1px solid oklch(100% 0 0 / 0.12); border-radius: 100px; padding: 7px 15px; white-space: nowrap;">Escalate</span>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 1px; background: oklch(100% 0 0 / 0.08); border-radius: 10px; overflow: hidden;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">DECISIONS CAPTURED</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;">All</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: clamp(7px, 1.25vh, 11px) 14px; background: oklch(15% 0.015 262);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.06em; color: oklch(62% 0.02 260);">RETRAINING SET</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600;">Active learning</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="position: absolute; left: clamp(478px, 52%, 620px); right: clamp(152px, 16vw, 196px); bottom: 92px; height: clamp(136px, 25vh, 196px); pointer-events: none;">
+
+        <div ref="{{ v1 }}" style="position: absolute; inset: 0; opacity: 0; visibility: hidden; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow: hidden;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.16em; color: oklch(72% 0.13 255); white-space: nowrap;">URL PARSER → FEATURE VECTOR</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: oklch(54% 0.02 260); white-space: nowrap;">LEXICAL ENGINE v4</span>
+          </div>
+          <div data-step="0" style="flex: 1; min-height: 0; display: grid; grid-template-columns: 1.05fr 1.25fr 0.7fr; gap: 8px;">
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">COMPONENTS</span>
+              <sc-for list="{{ urlParts }}" as="p" hint-placeholder-count="5">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(58% 0.02 260); white-space: nowrap;">{{ p.label }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ p.color }}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ p.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">EXTRACTED FEATURES</span>
+              <sc-for list="{{ featuresTop }}" as="f" hint-placeholder-count="6">
+                <div style="display: grid; grid-template-columns: 92px 1fr 34px; align-items: center; gap: 7px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(58% 0.02 260); white-space: nowrap;">{{ f.name }}</span>
+                  <span style="height: 3px; border-radius: 2px; background: oklch(100% 0 0 / 0.07); overflow: hidden; display: block;">
+                    <span style="display: block; height: 100%; border-radius: 2px; background: {{ f.color }}; width: {{ f.pct }};"></span>
+                  </span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: oklch(90% 0.008 260); text-align: right;">{{ f.value }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">VECTOR</span>
+              <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px;">
+                <sc-for list="{{ vector }}" as="v" hint-placeholder-count="19">
+                  <span style="aspect-ratio: 1; border-radius: 2px; background: {{ v.bg }}; border: 1px solid oklch(100% 0 0 / 0.07); display: block;"></span>
+                </sc-for>
+              </div>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(56% 0.02 260); margin-top: auto;">DIM {{ vectorDim }} · F32</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: oklch(78% 0.13 255);">→ RANDOM FOREST</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ v2 }}" style="position: absolute; inset: 0; opacity: 0; visibility: hidden; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow: hidden;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.16em; color: oklch(74% 0.16 22); white-space: nowrap;">UNICODE / IDN ANALYZER</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: oklch(54% 0.02 260); white-space: nowrap;">CLICK A 3D GLYPH</span>
+          </div>
+          <div data-step="0" style="flex: 1; min-height: 0; display: grid; grid-template-columns: 0.85fr 1.5fr 0.6fr; gap: 8px;">
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; border-color: ">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">INSPECTED</span>
+              <div style="display: flex; align-items: center; gap: 10px; min-width: 0;">
+                <span style="font-family: 'IBM Plex Mono', monospace; font-size: 26px; line-height: 1; color: {{ charColor }};">{{ charGlyph }}</span>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: oklch(92% 0.008 260); white-space: nowrap;">{{ charCode }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; color: oklch(62% 0.02 260); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ charName }}</span>
+                </div>
+              </div>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">HOMOGRAPH PIPELINE</span>
+              <sc-for list="{{ homoSteps }}" as="s" hint-placeholder-count="6">
+                <div style="display: flex; align-items: center; gap: 8px; min-height: 13px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ s.dot }}; flex-shrink: 0;"></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(58% 0.02 260); white-space: nowrap;">{{ s.k }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: {{ s.color }}; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ s.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">RISK</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 600; line-height: 1; color: oklch(72% 0.18 22);">{{ homoRisk }}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; line-height: 1.45; color: oklch(62% 0.02 260); margin-top: auto;">contribution to final decision</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ v3 }}" style="position: absolute; inset: 0; opacity: 0; visibility: hidden; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow: hidden;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.16em; color: oklch(74% 0.14 300); white-space: nowrap;">THREAT INTELLIGENCE GRAPH</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: oklch(54% 0.02 260); white-space: nowrap;">{{ graphCount }}</span>
+          </div>
+          <div data-step="0" style="flex: 1; min-height: 0; display: grid; grid-template-columns: 1.15fr 1fr 0.85fr; gap: 8px;">
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: {{ nodeAccent }};">{{ nodeType }}</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: oklch(94% 0.008 260); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ nodeLabel }}</span>
+              <sc-for list="{{ nodeRows }}" as="r" hint-placeholder-count="3">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(58% 0.02 260); white-space: nowrap;">{{ r.k }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: oklch(88% 0.01 260); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">RELATIONSHIPS</span>
+              <sc-for list="{{ legend }}" as="l" hint-placeholder-count="4">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="width: 6px; height: 6px; border-radius: 50%; background: {{ l.dot }}; flex-shrink: 0;"></span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: oklch(66% 0.02 260); white-space: nowrap;">{{ l.k }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: oklch(86% 0.01 260); margin-left: auto;">{{ l.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">CORRELATION</span>
+              <span style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; font-weight: 600; line-height: 1; color: oklch(78% 0.14 300);">{{ enrichConf }}</span>
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; line-height: 1.45; color: oklch(62% 0.02 260); margin-top: auto;">click any 3D node to inspect its evidence</span>
+            </div>
+          </div>
+        </div>
+
+        <div ref="{{ v4 }}" style="position: absolute; inset: 0; opacity: 0; visibility: hidden; display: flex; flex-direction: column; gap: 8px; pointer-events: auto; overflow: hidden;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; overflow: hidden;">
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; letter-spacing: 0.16em; color: oklch(78% 0.15 148); white-space: nowrap;">RISK ENGINE — SIGNAL CONVERGENCE</span>
+            <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: oklch(54% 0.02 260); white-space: nowrap;">WEIGHTED · EXPLAINABLE</span>
+          </div>
+          <div data-step="0" style="flex: 1; min-height: 0; display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px;">
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden;">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">CONTRIBUTING SIGNALS</span>
+              <sc-for list="{{ signals }}" as="s" hint-placeholder-count="5">
+                <div style="display: grid; grid-template-columns: 96px 1fr 30px 66px; align-items: center; gap: 8px;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(58% 0.02 260); white-space: nowrap;">{{ s.label }}</span>
+                  <span style="height: 3px; border-radius: 2px; background: oklch(100% 0 0 / 0.07); overflow: hidden; display: block;">
+                    <span style="display: block; height: 100%; border-radius: 2px; background: {{ s.color }}; width: {{ s.pct }};"></span>
+                  </span>
+                  <span style="font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 600; color: {{ s.color }}; text-align: right;">{{ s.score }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8px; letter-spacing: 0.06em; color: oklch(54% 0.02 260); text-align: right; white-space: nowrap;">{{ s.stage }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="border: 1px solid oklch(100% 0 0 / 0.09); border-radius: 10px; background: oklch(14% 0.015 262 / 0.66); backdrop-filter: blur(7px); padding: 9px 11px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; border-color: oklch(60% 0.16 22 / 0.4);">
+              <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.13em; color: oklch(56% 0.02 260);">FINAL DECISION</span>
+              <div style="display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap;">
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 22px; line-height: 1; font-weight: 600; color: {{ verdictColor }};">{{ verdict }}</span>
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 600; color: oklch(92% 0.008 260);">{{ riskScore }}</span>
+              </div>
+              <span style="height: 4px; border-radius: 2px; background: oklch(100% 0 0 / 0.07); overflow: hidden; display: block;">
+                <span style="display: block; height: 100%; border-radius: 2px; background: {{ verdictColor }}; width: {{ riskPct }};"></span>
+              </span>
+              <sc-for list="{{ verdictRows }}" as="r" hint-placeholder-count="2">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; min-width: 0;">
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 8.5px; letter-spacing: 0.08em; color: oklch(58% 0.02 260); white-space: nowrap;">{{ r.k }}</span>
+                  <span style="font-family: 'IBM Plex Mono', monospace; font-size: 9.5px; color: oklch(88% 0.01 260); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ r.v }}</span>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div style="position: absolute; right: clamp(18px, 3vw, 44px); top: 50%; transform: translateY(-50%); height: 300px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="position: absolute; right: 4px; top: 4px; bottom: 4px; width: 1px; background: oklch(100% 0 0 / 0.12);"></div>
+        <div ref="{{ stageStateRef }}" style="position: absolute; right: 22px; top: 318px; font-family: 'IBM Plex Mono', monospace; font-size: 9px; letter-spacing: 0.14em; color: oklch(70% 0.13 255); white-space: nowrap;">STAGE 1/5</div>
+        <div ref="{{ railRef }}" style="position: absolute; right: 4px; top: 4px; width: 1px; height: 0; background: linear-gradient(oklch(72% 0.16 255), oklch(70% 0.16 300));"></div>
+        <button onClick="{{ go1 }}" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; background: none; border: none; padding: 0; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: oklch(60% 0.02 260); white-space: nowrap;" style-hover="color: oklch(92% 0.01 260);">EXPOSURE<span ref="{{ d1 }}" style="width: 9px; height: 9px; border-radius: 50%; border: 1px solid oklch(100% 0 0 / 0.3); background: oklch(12% 0.015 260);"></span></button>
+        <button onClick="{{ go2 }}" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; background: none; border: none; padding: 0; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: oklch(60% 0.02 260); white-space: nowrap;" style-hover="color: oklch(92% 0.01 260);">EXTRACTION<span ref="{{ d2 }}" style="width: 9px; height: 9px; border-radius: 50%; border: 1px solid oklch(100% 0 0 / 0.3); background: oklch(12% 0.015 260);"></span></button>
+        <button onClick="{{ go3 }}" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; background: none; border: none; padding: 0; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: oklch(60% 0.02 260); white-space: nowrap;" style-hover="color: oklch(92% 0.01 260);">HOMOGRAPH<span ref="{{ d3 }}" style="width: 9px; height: 9px; border-radius: 50%; border: 1px solid oklch(100% 0 0 / 0.3); background: oklch(12% 0.015 260);"></span></button>
+        <button onClick="{{ go4 }}" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; background: none; border: none; padding: 0; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: oklch(60% 0.02 260); white-space: nowrap;" style-hover="color: oklch(92% 0.01 260);">ENRICHMENT<span ref="{{ d4 }}" style="width: 9px; height: 9px; border-radius: 50%; border: 1px solid oklch(100% 0 0 / 0.3); background: oklch(12% 0.015 260);"></span></button>
+        <button onClick="{{ go5 }}" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; background: none; border: none; padding: 0; cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: 0.12em; color: oklch(60% 0.02 260); white-space: nowrap;" style-hover="color: oklch(92% 0.01 260);">DECISION<span ref="{{ d5 }}" style="width: 9px; height: 9px; border-radius: 50%; border: 1px solid oklch(100% 0 0 / 0.3); background: oklch(12% 0.015 260);"></span></button>
+      </div>
+
+      <div style="position: absolute; bottom: 26px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 0 clamp(20px, 4vw, 56px);">
+        <button onClick="{{ pulse }}" style="display: flex; align-items: center; gap: 9px; font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600; color: oklch(94% 0.008 260); background: oklch(100% 0 0 / 0.06); border: 1px solid oklch(100% 0 0 / 0.14); border-radius: 100px; padding: 9px 18px; cursor: pointer; backdrop-filter: blur(10px); white-space: nowrap;" style-hover="background: oklch(100% 0 0 / 0.11);">
+          <span style="width: 7px; height: 7px; border-radius: 50%; background: linear-gradient(135deg, oklch(72% 0.17 250), oklch(64% 0.17 300));"></span>
+          Re-scan field
+        </button>
+        <button onClick="{{ toggleOrbit }}" style="font-family: 'Manrope', sans-serif; font-size: 13px; font-weight: 600; color: oklch(78% 0.015 260); background: transparent; border: 1px solid oklch(100% 0 0 / 0.12); border-radius: 100px; padding: 9px 18px; cursor: pointer; white-space: nowrap;" style-hover="color: oklch(94% 0.008 260); border-color: oklch(100% 0 0 / 0.24);">{{ orbitLabel }}</button>
+        <span style="font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.1em; color: oklch(54% 0.02 260); white-space: nowrap;">DRAG TO ORBIT &middot; SCROLL TO ADVANCE</span>
+      </div>
+
+      <div ref="{{ cueRef }}" style="position: absolute; bottom: 76px; left: 50%; transform: translateX(-50%); font-family: 'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing: 0.14em; color: oklch(58% 0.02 260); display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none;">
+        <span style="animation: tf-pulse 2.2s ease-in-out infinite;">&#8595;</span>
+      </div>
+
+    </div>
+  </div>
+
+  <section style="position: relative; padding: clamp(80px, 12vh, 140px) clamp(20px, 4vw, 56px) clamp(90px, 14vh, 150px); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 24px; border-top: 1px solid oklch(100% 0 0 / 0.07); background: linear-gradient(180deg, oklch(13% 0.018 262), oklch(11% 0.015 262));">
+    <div style="font-family: 'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: 0.14em; color: oklch(70% 0.13 255);">// END OF SEQUENCE</div>
+    <h2 style="font-family: 'Space Grotesk', sans-serif; font-size: clamp(28px, 3.6vw, 46px); line-height: 1.12; letter-spacing: -0.015em; font-weight: 600; margin: 0; max-width: 720px; text-wrap: pretty;">Paste an indicator. Read the evidence, not a verdict.</h2>
+    <p style="font-size: 15.5px; line-height: 1.6; color: oklch(70% 0.015 260); margin: 0; max-width: 540px; text-wrap: pretty;">Random Forest scoring, Unicode confusable analysis, IP and WHOIS enrichment, and an analyst decision that trains the next model &mdash; in one console.</p>
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 8px;">
+      <button style="display: flex; align-items: center; gap: 10px; font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600; background: oklch(96% 0.005 260); color: oklch(15% 0.01 260); border: none; border-radius: 100px; padding: 8px 8px 8px 22px; cursor: pointer; white-space: nowrap;">
+        <span style="white-space: nowrap;">Open Triage Desk</span>
+        <span style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, oklch(68% 0.16 250), oklch(62% 0.16 300)); display: flex; align-items: center; justify-content: center; color: white; font-size: 14px;">&rarr;</span>
+      </button>
+      <button style="font-family: 'Manrope', sans-serif; font-size: 15px; font-weight: 600; background: transparent; color: oklch(94% 0.008 260); border: 1px solid oklch(100% 0 0 / 0.16); border-radius: 100px; padding: 13px 24px; cursor: pointer; white-space: nowrap;" style-hover="border-color: oklch(100% 0 0 / 0.3);">Read the method</button>
+    </div>
+  </section>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;analysis&quot;:{&quot;editor&quot;:null,&quot;default&quot;:null,&quot;tsType&quot;:&quot;AnalysisResult | null&quot;,&quot;section&quot;:&quot;Data&quot;},&quot;particleCount&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:2600,&quot;min&quot;:800,&quot;max&quot;:4200,&quot;step&quot;:100,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Field&quot;},&quot;trailLength&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:0.5,&quot;min&quot;:0,&quot;max&quot;:1,&quot;step&quot;:0.05,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Field&quot;},&quot;bloom&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Render&quot;},&quot;showLinks&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Field&quot;}}">
+class Component extends DCLogic {
+  state = { orbit: true };
+
+  renderVals() {
+    return {
+      orbitLabel: this.state.orbit ? 'Auto-orbit: on' : 'Auto-orbit: off',
+      toggleOrbit: () => this.setState(s => ({ orbit: !s.orbit })),
+      pulse: () => this.emitPulse(),
+      canvasRef: el => { this.canvas = el; },
+      scrollRef: el => { this.scroller = el; },
+      railRef: el => { this.rail = el; },
+      cueRef: el => { this.cue = el; },
+      feedRef: el => { this.feed = el; },
+      stageStateRef: el => { this.stageState = el; },
+      fr0: el => this.setRow(0, el), fr1: el => this.setRow(1, el),
+      fr2: el => this.setRow(2, el),
+      nodesRef: el => { this.elNodes = el; },
+      blockedRef: el => { this.elBlocked = el; },
+      stateRef: el => { this.elState = el; },
+      p1: el => this.setPanel(0, el), p2: el => this.setPanel(1, el),
+      p3: el => this.setPanel(2, el), p4: el => this.setPanel(3, el),
+      p5: el => this.setPanel(4, el),
+      d1: el => this.setDot(0, el), d2: el => this.setDot(1, el),
+      d3: el => this.setDot(2, el), d4: el => this.setDot(3, el),
+      d5: el => this.setDot(4, el),
+      go1: () => this.goTo(0), go2: () => this.goTo(1), go3: () => this.goTo(2),
+      go4: () => this.goTo(3), go5: () => this.goTo(4),
+      onDown: e => this.pointerDown(e),
+      onMove: e => this.pointerMove(e),
+      onUp: e => this.pointerUp(e),
+      v1: el => this.setViz(1, el), v2: el => this.setViz(2, el),
+      v3: el => this.setViz(3, el), v4: el => this.setViz(4, el),
+      pickChar: e => {
+        const i = +e.currentTarget.getAttribute('data-ci');
+        if (!isNaN(i)) this.setState({ ci: i });
+      },
+      pickNode: e => {
+        const id = e.currentTarget.getAttribute('data-nid');
+        if (id && id !== this.state.nid) this.setState({ nid: id });
+      },
+      ...this.viz()
+    };
+  }
+
+  setViz(i, el) { (this.vizEls = this.vizEls || [])[i] = el; if (el) el.style.transformOrigin = 'top left'; }
+
+  fitViz() {
+    if (!this.vizEls) return;
+    for (let k = 1; k <= 4; k++) {
+      const el = this.vizEls[k];
+      if (!el) continue;
+      el.style.width = '100%'; el.style.height = '100%';
+      const aw = el.clientWidth, ah = el.clientHeight;
+      if (!aw || !ah) continue;
+      const compact = ah < 430;
+      el.querySelectorAll('[data-drop]').forEach(c => { c.style.display = compact ? 'none' : ''; });
+      const box = el.getBoundingClientRect();
+      let nw = el.scrollWidth, nh = el.scrollHeight;
+      el.querySelectorAll('*').forEach(c => {
+        if (!c.scrollHeight) return;
+        const r = c.getBoundingClientRect();
+        nh = Math.max(nh, r.top - box.top + c.scrollHeight);
+        nw = Math.max(nw, r.left - box.left + c.scrollWidth);
+      });
+      const s = Math.max(0.78, Math.min(1, Math.min(ah / (nh + 2), aw / (nw + 2))));
+      el.__fit = s;
+      if (s < 1) {
+        el.style.width = (100 / s).toFixed(2) + '%';
+        el.style.height = (100 / s).toFixed(2) + '%';
+      }
+    }
+  }
+
+  /* ---------- analysis data contract ----------
+     { exposure, extraction, homograph, enrichment, decision }
+     props.analysis replaces the mock without touching any visualization. */
+
+  static get MOCK() {
+    return {
+      extraction: { url: 'https://secure-login.example.com/account/verify?id=9281' },
+      homograph: {
+        legitimate: 'apple-id-verify.com',
+        suspect: '\u0430pple-id-verify.com',
+        brand: 'apple.com',
+        names: { '\u0430': 'CYRILLIC SMALL LETTER A', 'a': 'LATIN SMALL LETTER A' },
+        confusables: { '\u0430': 'a', '\u0435': 'e', '\u043e': 'o', '\u0440': 'p', '\u0441': 'c', '\u0445': 'x' },
+        brandSimilarity: 0.97
+      },
+      enrichment: {
+        nodes: [
+          { id: 'domain', label: 'apple-id-verify.com', type: 'DOMAIN', sev: 'malicious', ring: 0,
+            rows: [['REGISTERED', '6 hours ago'], ['REGISTRAR', 'NiceNIC'], ['TLD', '.com']] },
+          { id: 'ip', label: '45.133.1.87', type: 'IP ADDRESS', sev: 'malicious', ring: 1,
+            rows: [['ASN', 'AS204601'], ['GEO', 'Amsterdam, NL'], ['TYPE', 'Hosting / proxy']] },
+          { id: 'dns', label: 'DNS', type: 'DNS RECORDS', sev: 'suspicious', ring: 1,
+            rows: [['A', '45.133.1.87'], ['NS', 'ns1.fastflux.su'], ['TTL', '60 s']] },
+          { id: 'whois', label: 'WHOIS', type: 'REGISTRATION', sev: 'suspicious', ring: 1,
+            rows: [['AGE', '6 hours'], ['PRIVACY', 'Redacted'], ['EMAIL', 'proton.me']] },
+          { id: 'ssl', label: 'TLS CERT', type: 'CERTIFICATE', sev: 'suspicious', ring: 1,
+            rows: [['ISSUER', "Let's Encrypt"], ['AGE', '5 hours'], ['SAN COUNT', '14']] },
+          { id: 'related', label: 'related \u00d7 14', type: 'RELATED DOMAINS', sev: 'malicious', ring: 2,
+            rows: [['SHARED CERT', '14 hosts'], ['PATTERN', 'brand-id-*'], ['FIRST SEEN', '9 h ago']] },
+          { id: 'campaign', label: 'ClearFake', type: 'CAMPAIGN', sev: 'malicious', ring: 2,
+            rows: [['TRACKED SINCE', '2025-11'], ['CONFIDENCE', '0.94'], ['TARGET', 'Consumer ID']] },
+          { id: 'malware', label: 'credential kit', type: 'MALWARE INDICATOR', sev: 'malicious', ring: 2,
+            rows: [['FAMILY', 'EvilProxy'], ['KIT HASH', 'a91f\u2026e4'], ['CAPTURES', 'OTP + pass']] },
+          { id: 'rep', label: 'reputation', type: 'REPUTATION SOURCES', sev: 'malicious', ring: 2,
+            rows: [['FEEDS HIT', '6 / 9'], ['FIRST FLAG', '2 h ago'], ['CONSENSUS', 'Phishing']] },
+          { id: 'pdns', label: 'passive DNS', type: 'PASSIVE DNS', sev: 'new', ring: 2,
+            rows: [['RESOLUTIONS', '312'], ['UNIQUE IPS', '3'], ['WINDOW', '6 h']] },
+          { id: 'registrar', label: 'registrar', type: 'REGISTRAR HISTORY', sev: 'neutral', ring: 2,
+            rows: [['ABUSE RATE', '18 %'], ['DOMAINS', '2.1 M'], ['RESPONSE', 'Slow']] }
+        ],
+        edges: [
+          ['domain', 'ip', 'malicious'], ['domain', 'dns', 'suspicious'],
+          ['domain', 'whois', 'suspicious'], ['domain', 'ssl', 'suspicious'],
+          ['ssl', 'related', 'malicious'], ['ip', 'campaign', 'malicious'],
+          ['ip', 'malware', 'malicious'], ['dns', 'pdns', 'new'],
+          ['whois', 'registrar', 'neutral'], ['domain', 'rep', 'malicious'],
+          ['related', 'campaign', 'malicious'], ['rep', 'campaign', 'malicious']
+        ]
+      },
+      decision: {
+        thresholds: { suspicious: 40, malicious: 70 },
+        signals: [
+          { key: 'lexical', label: 'Lexical Risk', score: 72, weight: 0.2, stage: 'EXTRACTION' },
+          { key: 'homograph', label: 'Homograph Risk', score: 91, weight: 0.3, stage: 'HOMOGRAPH' },
+          { key: 'reputation', label: 'Reputation Risk', score: 84, weight: 0.22, stage: 'ENRICHMENT' },
+          { key: 'infra', label: 'Infrastructure Risk', score: 65, weight: 0.16, stage: 'ENRICHMENT' },
+          { key: 'behavioral', label: 'Behavioral Risk', score: 78, weight: 0.12, stage: 'EXPOSURE' }
+        ]
+      }
+    };
+  }
+
+  /* ---------- analytical operations (real, not hard-coded) ---------- */
+
+  static entropy(s) {
+    const m = {};
+    for (const ch of s) m[ch] = (m[ch] || 0) + 1;
+    let h = 0;
+    for (const k in m) { const p = m[k] / s.length; h -= p * Math.log2(p); }
+    return h;
+  }
+
+  static punycode(label) {
+    const cps = Array.from(label).map(c => c.codePointAt(0));
+    if (!cps.some(c => c > 127)) return label;
+    const basic = cps.filter(c => c < 128);
+    let out = basic.map(c => String.fromCharCode(c)).join('');
+    let h = basic.length; const b = h;
+    if (b) out += '-';
+    let n = 128, delta = 0, bias = 72;
+    const adapt = (dl, np, first) => {
+      dl = first ? Math.floor(dl / 700) : dl >> 1;
+      dl += Math.floor(dl / np);
+      let k = 0;
+      while (dl > 455) { dl = Math.floor(dl / 35); k += 36; }
+      return k + Math.floor(36 * dl / (dl + 38));
+    };
+    const dig = v => String.fromCharCode(v < 26 ? v + 97 : v + 22);
+    while (h < cps.length) {
+      let m = Infinity;
+      cps.forEach(c => { if (c >= n && c < m) m = c; });
+      delta += (m - n) * (h + 1);
+      n = m;
+      for (const c of cps) {
+        if (c < n) delta++;
+        if (c === n) {
+          let q = delta;
+          for (let k = 36; ; k += 36) {
+            const t = k <= bias ? 1 : k >= bias + 26 ? 26 : k - bias;
+            if (q < t) break;
+            out += dig(t + ((q - t) % (36 - t)));
+            q = Math.floor((q - t) / (36 - t));
+          }
+          out += dig(q);
+          bias = adapt(delta, h + 1, h === b);
+          delta = 0; h++;
+        }
+      }
+      delta++; n++;
+    }
+    return 'xn--' + out;
+  }
+
+  analysis() {
+    if (this._a) return this._a;
+    const D = this.props.analysis || Component.MOCK;
+    const url = D.extraction.url;
+    let u; try { u = new URL(url); } catch (_) { u = null; }
+    const host = u ? u.hostname : url;
+    const bits = host.split('.');
+    const domain = bits.slice(-2).join('.');
+    const sub = bits.slice(0, -2).join('.');
+    const path = u ? u.pathname : '';
+    const query = u ? u.search : '';
+    const KW = ['login', 'verify', 'secure', 'account', 'update', 'confirm', 'signin', 'bank'];
+    const num = s => (s.match(/\d/g) || []).length;
+    const feats = [
+      ['url_length', url.length, 120],
+      ['domain_length', domain.length, 40],
+      ['subdomain_count', sub ? sub.split('.').length : 0, 5],
+      ['path_depth', path.split('/').filter(Boolean).length, 6],
+      ['query_params', query ? query.slice(1).split('&').length : 0, 6],
+      ['special_chars', (url.match(/[^\w:/.?=&-]/g) || []).length, 12],
+      ['digit_count', num(url), 20],
+      ['hyphen_count', (url.match(/-/g) || []).length, 6],
+      ['entropy', +Component.entropy(url).toFixed(2), 6],
+      ['host_entropy', +Component.entropy(host).toFixed(2), 5],
+      ['suspicious_kw', KW.filter(k => url.toLowerCase().includes(k)).length, 4],
+      ['https', u && u.protocol === 'https:' ? 1 : 0, 1],
+      ['pct_encoded', (url.match(/%[0-9a-f]{2}/gi) || []).length, 6]
+    ];
+    const H = D.homograph;
+    const chars = Array.from(H.suspect).map((ch, i) => {
+      const cp = ch.codePointAt(0);
+      const nonAscii = cp > 127;
+      return {
+        i, ch, cp,
+        hex: 'U+' + cp.toString(16).toUpperCase().padStart(4, '0'),
+        name: H.names[ch] || (nonAscii ? 'NON-ASCII CODEPOINT' : 'LATIN / ASCII'),
+        ascii: H.confusables[ch] || (nonAscii ? null : ch),
+        confusable: nonAscii && !!H.confusables[ch]
+      };
+    });
+    const labels = H.suspect.split('.');
+    const puny = labels.map(l => Component.punycode(l)).join('.');
+    const sig = D.decision.signals;
+    const wsum = sig.reduce((a, s) => a + s.weight, 0) || 1;
+    const risk = Math.round(sig.reduce((a, s) => a + s.score * s.weight, 0) / wsum);
+    const th = D.decision.thresholds;
+    this._a = {
+      D, url, u, host, domain, sub, path, query, feats, chars, puny,
+      firstBad: chars.findIndex(c => c.confusable),
+      risk, verdict: risk >= th.malicious ? 'MALICIOUS' : risk >= th.suspicious ? 'SUSPICIOUS' : 'SAFE',
+      wsum
+    };
+    return this._a;
+  }
+
+  graph() {
+    if (this._g) return this._g;
+    const E = this.analysis().D.enrichment;
+    const R = [0, 104, 178], CX = 310, CY = 200;
+    const byRing = [[], [], []];
+    E.nodes.forEach(n => byRing[n.ring].push(n));
+    const pos = {};
+    byRing.forEach((list, ring) => list.forEach((n, i) => {
+      if (!ring) { pos[n.id] = [CX, CY]; return; }
+      const a = (i / list.length) * Math.PI * 2 - Math.PI / 2 + (ring === 2 ? 0.34 : 0);
+      pos[n.id] = [CX + Math.cos(a) * R[ring] * 1.32, CY + Math.sin(a) * R[ring] * 0.86];
+    }));
+    this._g = { pos, nodes: E.nodes, edges: E.edges };
+    return this._g;
+  }
+
+  viz() {
+    const A = this.analysis();
+    const SEV = {
+      malicious: 'oklch(68% 0.19 22)', suspicious: 'oklch(76% 0.15 70)',
+      neutral: 'oklch(70% 0.02 260)', new: 'oklch(72% 0.15 300)'
+    };
+    const seg = (t, c) => ({ text: t, color: c });
+    const u = A.u;
+    const urlSegs = u ? [
+      seg(u.protocol + '//', 'oklch(64% 0.02 260)'),
+      seg(A.sub ? A.sub + '.' : '', 'oklch(76% 0.14 255)'),
+      seg(A.domain, 'oklch(94% 0.008 260)'),
+      seg(A.path, 'oklch(74% 0.13 300)'),
+      seg(A.query, 'oklch(76% 0.15 70)')
+    ].filter(s => s.text) : [seg(A.url, 'oklch(94% 0.008 260)')];
+
+    const urlParts = [
+      { label: 'PROTOCOL', value: u ? u.protocol.replace(':', '') : '\u2014', color: 'oklch(64% 0.1 260)' },
+      { label: 'SUBDOMAIN', value: A.sub || '\u2014', color: 'oklch(70% 0.15 255)' },
+      { label: 'DOMAIN', value: A.domain, color: 'oklch(88% 0.02 260)' },
+      { label: 'PATH', value: A.path || '/', color: 'oklch(68% 0.15 300)' },
+      { label: 'QUERY', value: A.query ? A.query.slice(1) : '\u2014', color: 'oklch(72% 0.15 70)' }
+    ];
+
+    const features = A.feats.map(f => {
+      const r = Math.max(0.06, Math.min(1, f[1] / f[2]));
+      return {
+        name: f[0], value: f[1],
+        pct: (r * 100).toFixed(0) + '%',
+        color: r > 0.66 ? 'oklch(70% 0.17 30)' : r > 0.33 ? 'oklch(76% 0.14 70)' : 'oklch(72% 0.13 255)'
+      };
+    });
+
+    const vector = A.feats.concat(A.feats.slice(0, 6)).map(f => {
+      const r = Math.max(0.05, Math.min(1, f[1] / f[2]));
+      return { bg: 'oklch(' + (26 + r * 46).toFixed(0) + '% ' + (0.03 + r * 0.14).toFixed(3) + ' ' + (255 - r * 60).toFixed(0) + ')' };
+    });
+
+    const ci = this.state.ci == null ? Math.max(0, A.firstBad) : this.state.ci;
+    const C = A.chars[ci] || A.chars[0];
+    const legit = Array.from(A.D.homograph.legitimate).map(ch => ({ ch }));
+    const suspectChars = A.chars.map(c => ({
+      i: c.i, ch: c.ch,
+      color: c.confusable ? 'oklch(76% 0.18 22)' : c.i === ci ? 'oklch(94% 0.008 260)' : 'oklch(70% 0.015 260)',
+      bg: c.i === ci ? 'oklch(100% 0 0 / 0.1)' : c.confusable ? 'oklch(50% 0.16 22 / 0.2)' : 'transparent',
+      border: c.i === ci ? 'oklch(70% 0.14 255)' : 'transparent'
+    }));
+    const good = 'oklch(84% 0.15 148)', bad = 'oklch(76% 0.18 22)', dim = 'oklch(88% 0.01 260)';
+    const charRows = [
+      { k: 'CODEPOINT', v: C.hex, color: dim },
+      { k: 'SCRIPT', v: C.confusable ? 'Cyrillic' : 'Latin / ASCII', color: C.confusable ? bad : dim },
+      { k: 'CONFUSABLE WITH', v: C.confusable ? '\u2018' + C.ascii + '\u2019 U+00' + C.ascii.charCodeAt(0).toString(16).toUpperCase() : 'none', color: C.confusable ? bad : good },
+      { k: 'SKELETON MAPS TO', v: C.ascii || C.ch, color: C.confusable ? good : dim }
+    ];
+    const homoSteps = [
+      { k: 'UNICODE DETECTION', v: A.chars.filter(c => c.cp > 127).length + ' non-ASCII', dot: bad, color: bad },
+      { k: 'PUNYCODE', v: A.puny, dot: bad, color: dim },
+      { k: 'CONFUSABLE MAPPING', v: A.chars.filter(c => c.confusable).length + ' mapped', dot: bad, color: dim },
+      { k: 'SKELETON', v: A.chars.map(c => c.ascii || c.ch).join(''), dot: good, color: good },
+      { k: 'BRAND MATCH', v: A.D.homograph.brand, dot: bad, color: bad },
+      { k: 'SIMILARITY', v: A.D.homograph.brandSimilarity.toFixed(2), dot: bad, color: dim }
+    ];
+
+    const G = this.graph();
+    const nid = this.state.nid || 'domain';
+    const gnodes = G.nodes.map(n => {
+      const p = G.pos[n.id], on = n.id === nid, c = SEV[n.sev];
+      const r = n.ring === 0 ? 21 : n.ring === 1 ? 13 : 9;
+      return {
+        id: n.id, label: n.label, x: p[0].toFixed(1), y: p[1].toFixed(1),
+        r, halo: r + (on ? 13 : 7), haloFill: on ? 'oklch(70% 0.14 255 / 0.24)' : 'oklch(100% 0 0 / 0.04)',
+        fill: n.ring === 0 ? c : 'oklch(16% 0.02 262)', stroke: on ? 'oklch(88% 0.1 255)' : c,
+        ty: r + 15, textFill: on ? 'oklch(96% 0.008 260)' : 'oklch(70% 0.015 260)'
+      };
+    });
+    const edges = G.edges.map(e => {
+      const a = G.pos[e[0]], b = G.pos[e[1]];
+      const hot = e[2] === 'malicious';
+      return {
+        x1: a[0].toFixed(1), y1: a[1].toFixed(1), x2: b[0].toFixed(1), y2: b[1].toFixed(1),
+        stroke: SEV[e[2]] || SEV.neutral, w: hot ? 1.5 : 1, dash: e[2] === 'new' ? '3 5' : 'none'
+      };
+    });
+    const N = G.nodes.find(n => n.id === nid) || G.nodes[0];
+    const counts = { malicious: 0, suspicious: 0, neutral: 0, new: 0 };
+    G.edges.forEach(e => { counts[e[2]] = (counts[e[2]] || 0) + 1; });
+
+    const S = A.D.decision.signals;
+    const sigColor = s => s >= 80 ? 'oklch(68% 0.19 22)' : s >= 60 ? 'oklch(76% 0.15 55)' : 'oklch(74% 0.14 255)';
+    const signals = S.map(s => ({
+      label: s.label, score: s.score, stage: s.stage,
+      pct: s.score + '%', color: sigColor(s.score),
+      share: ((s.score * s.weight) / S.reduce((a, x) => a + x.score * x.weight, 0) * 100).toFixed(0) + '%'
+    }));
+    const vc = A.verdict === 'MALICIOUS' ? 'oklch(70% 0.19 22)' : A.verdict === 'SUSPICIOUS' ? 'oklch(78% 0.15 65)' : 'oklch(82% 0.15 148)';
+    const top = S.slice().sort((a, b) => b.score * b.weight - a.score * a.weight)[0];
+
+    return {
+      urlSegs, urlParts, features, vector, vectorDim: A.feats.length + 6,
+      featuresTop: features.filter(f => ['url_length', 'entropy', 'hyphen_count', 'digit_count', 'suspicious_kw', 'subdomain_count'].indexOf(f.name) >= 0),
+      enrichConf: '0.94',
+      legitChars: legit, suspectChars,
+      charGlyph: C.ch, charCode: C.hex, charName: C.name, charRows,
+      charColor: C.confusable ? bad : 'oklch(94% 0.008 260)',
+      charBorder: C.confusable ? 'oklch(50% 0.16 22 / 0.5)' : 'oklch(100% 0 0 / 0.09)',
+      homoSteps, homoRisk: S.find(s => s.key === 'homograph').score,
+      gnodes, edges, graphCount: G.nodes.length + ' NODES \u00b7 ' + G.edges.length + ' EDGES',
+      nodeLabel: N.label, nodeType: N.type,
+      nodeAccent: SEV[N.sev], nodeBorder: SEV[N.sev].replace(')', ' / 0.45)').replace('oklch(', 'oklch('),
+      nodeRows: N.rows.map(r => ({ k: r[0], v: r[1] })),
+      legend: [
+        { k: 'Malicious', v: counts.malicious, dot: SEV.malicious },
+        { k: 'Suspicious', v: counts.suspicious, dot: SEV.suspicious },
+        { k: 'Newly found', v: counts.new, dot: SEV.new },
+        { k: 'Neutral', v: counts.neutral, dot: SEV.neutral }
+      ],
+      signals, verdict: A.verdict, verdictColor: vc,
+      verdictBorder: vc.replace(')', ' / 0.4)'),
+      riskScore: A.risk, riskPct: A.risk + '%',
+      verdictRows: [
+        { k: 'DECISIVE SIGNAL', v: top.label + ' (' + top.stage + ')' },
+        { k: 'THRESHOLD', v: '\u2265 ' + A.D.decision.thresholds.malicious + ' malicious' },
+        { k: 'MODEL', v: 'Random Forest + rules' }
+      ],
+      verdictWhy: 'Homograph substitution carries the decision: a Cyrillic glyph resolves to the ' +
+        A.D.homograph.brand + ' skeleton at ' + A.D.homograph.brandSimilarity.toFixed(2) +
+        ' similarity, corroborated by a 6-hour-old domain on hosting infrastructure already tied to a tracked campaign.'
+    };
+  }
+
+  setPanel(i, el) { (this.panels = this.panels || [])[i] = el; }
+  setRow(i, el) { (this.rows = this.rows || [])[i] = el; }
+  setDot(i, el) { (this.dots = this.dots || [])[i] = el; }
+
+  componentDidMount() {
+    this.ACTS = 5;
+    this.af = 0; this.afSmooth = 0;
+    this.yaw = 0.4; this.pitch = -0.18; this.dragYaw = 0; this.dragPitch = 0; this.spin = 0;
+    this.pulses = [];
+    this.blocked = 2874120;
+    this.t0 = performance.now();
+    this.mouse = { x: -9999, y: -9999, on: false };
+    this.vel = 0; this.velS = 0; this.roll = 0; this.rollC = 1; this.rollS = 0;
+    this.actIdx = 0; this.flash = -9999;
+    this.reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    this.makeSprites();
+    this.makeRoutes();
+    this.build();
+    if (Component.MASK) { this.mask = Component.MASK; this.applyGeo(); this.geoReady = true; }
+    else if (window.requestIdleCallback) requestIdleCallback(() => this.loadGeo(), { timeout: 1200 });
+    else setTimeout(() => this.loadGeo(), 250);
+    this.onResize = () => { this.resize(); this.fitViz(); };
+    setTimeout(() => this.fitViz(), 320);
+    setTimeout(() => this.fitViz(), 1400);
+    this.onScroll = () => this.readScroll();
+    this.onKey = ev => {
+      const k = ev.key;
+      if (k === 'ArrowDown' || k === 'ArrowRight' || k === 'PageDown') { this.goTo(Math.min(this.ACTS - 1, Math.round(this.af) + 1)); ev.preventDefault(); }
+      else if (k === 'ArrowUp' || k === 'ArrowLeft' || k === 'PageUp') { this.goTo(Math.max(0, Math.round(this.af) - 1)); ev.preventDefault(); }
+      else if (k >= '1' && k <= '5') this.goTo(+k - 1);
+    };
+    window.addEventListener('resize', this.onResize);
+    window.addEventListener('keydown', this.onKey);
+    if (this.scroller) this.scroller.addEventListener('scroll', this.onScroll, { passive: true });
+    this.resize();
+    this.readScroll();
+    this.alive = true;
+    Component.gen = (Component.gen || 0) + 1;
+    const gen = Component.gen;
+    this.tick = 0;
+    this.arm = () => {
+      if (!this.alive || gen !== Component.gen) return;
+      const id = ++this.tick;
+      requestAnimationFrame(t => {
+        if (id !== this.tick || !this.alive || gen !== Component.gen) return;
+        this.lastFrame = performance.now();
+        this.frame(t);
+        this.arm();
+      });
+    };
+    this.arm();
+    this.watch = setInterval(() => {
+      if (this.alive && performance.now() - (this.lastFrame || 0) > 500) this.arm();
+    }, 700);
+    this.frame(performance.now());
+    this.hud(0, performance.now() + 1000);
+    window.__tf = this;
+  }
+
+  componentDidUpdate(prev) {
+    if (prev.analysis !== this.props.analysis) { this._a = null; this._g = null; this._sc = null; }
+    if (prev.particleCount !== this.props.particleCount) this.build();
+  }
+
+  componentWillUnmount() {
+    this.alive = false;
+    clearInterval(this.watch);
+    window.removeEventListener('resize', this.onResize);
+    window.removeEventListener('keydown', this.onKey);
+    if (this.scroller) this.scroller.removeEventListener('scroll', this.onScroll);
+  }
+
+  /* ---------- geometry: one target set per act ---------- */
+
+  build() {
+    const N = Math.max(300, Math.min(4200, Math.round(this.props.particleCount ?? 2600)));
+    this.N = N;
+    let seed = 20260821;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+
+    this.pos = new Float32Array(N * 3);
+    this.ease = new Float32Array(N);
+    this.hostile = new Uint8Array(N);
+    this.core = new Uint8Array(N);
+    this.T = [];
+    for (let a = 0; a < 5; a++) this.T.push(new Float32Array(N * 3));
+
+    for (let i = 0; i < N; i++) {
+      this.ease[i] = 0.035 + rnd() * 0.055;
+      this.hostile[i] = rnd() < 0.2 ? 1 : 0;
+      this.core[i] = !this.hostile[i] && rnd() < 0.09 ? 1 : 0;
+    }
+
+    const GA = Math.PI * (3 - Math.sqrt(5));
+
+    // 0 — exposure: sphere of freshly registered domains
+    for (let i = 0; i < N; i++) {
+      const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), th = GA * i;
+      const R = 1.02 + rnd() * 0.06;
+      this.T[0].set([Math.cos(th) * r * R, y * R, Math.sin(th) * r * R], i * 3);
+    }
+
+    // 1 — extraction: flat feature matrix
+    const cols = Math.ceil(Math.sqrt(N));
+    for (let i = 0; i < N; i++) {
+      const cx = (i % cols) / (cols - 1) - 0.5, cz = Math.floor(i / cols) / (cols - 1) - 0.5;
+      const x = cx * 3.5, z = cz * 3.5;
+      this.T[1].set([x, Math.sin(x * 2.2 + z * 1.4) * 0.07 + (rnd() - 0.5) * 0.02, z], i * 3);
+    }
+
+    // 2 — homograph: a single substituted codepoint pierces the shell
+    const ox = -1.9, oy = 1.35, oz = -0.9;
+    let hIdx = 0;
+    let hCount = 0;
+    for (let i = 0; i < N; i++) hCount += this.hostile[i];
+    hCount = Math.max(1, hCount);
+    for (let i = 0; i < N; i++) {
+      if (this.hostile[i]) {
+        const t = hIdx++ / hCount, k = Math.pow(t, 0.7);
+        const sp = 0.16 * (1 - k) + 0.02;
+        this.T[2].set([
+          ox * (1 - k) + (rnd() - 0.5) * sp * 2,
+          oy * (1 - k) + (rnd() - 0.5) * sp * 2,
+          oz * (1 - k) + (rnd() - 0.5) * sp * 2
+        ], i * 3);
+      } else {
+        const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), th = GA * i;
+        const x = Math.cos(th) * r, zz = Math.sin(th) * r;
+        const dx = x - ox * 0.5, dy = y - oy * 0.5, dz = zz - oz * 0.5;
+        const dd = Math.sqrt(dx * dx + dy * dy + dz * dz);
+        const s = 1.05 - Math.exp(-dd * dd * 2.6) * 0.5;
+        this.T[2].set([x * s, y * s, zz * s], i * 3);
+      }
+    }
+
+    // 3 — enrichment: four evidence streams
+    this.clusterLabels = ['LEXICAL · 19f', 'IP REPUTATION', 'WHOIS AGE', 'PAGE CONTENT'];
+    this.clusters = [];
+    for (let c = 0; c < 4; c++) {
+      const a = (c / 4) * Math.PI * 2 + 0.5;
+      this.clusters.push([Math.cos(a) * 1.42, (c % 2 ? 0.4 : -0.4), Math.sin(a) * 1.42]);
+    }
+    const members = this.clusters.map(() => []);
+    for (let i = 0; i < N; i++) {
+      const c = i % 4, C = this.clusters[c];
+      const g = () => (rnd() + rnd() + rnd() - 1.5) * 0.24;
+      this.T[3].set([C[0] + g(), C[1] + g(), C[2] + g()], i * 3);
+      if (members[c].length < 30) members[c].push(i);
+    }
+    this.links = [];
+    members.forEach(m => {
+      for (let a = 0; a < m.length; a++)
+        for (let b = a + 1; b < m.length; b++)
+          if ((a * 31 + b * 17) % 9 === 0) this.links.push([m[a], m[b]]);
+    });
+    for (let c = 0; c < 4; c++) for (let k = 0; k < 3; k++) this.links.push([members[c][k], members[(c + 1) % 4][k + 3]]);
+
+    // 4 — decision: quarantine shell, core verdict, feedback ring
+    for (let i = 0; i < N; i++) {
+      const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), th = GA * i;
+      if (this.core[i]) {
+        this.T[4].set([Math.cos(th) * r * 0.32, y * 0.32, Math.sin(th) * r * 0.32], i * 3);
+      } else if (this.hostile[i]) {
+        const a = GA * i, rr = 1.62 + rnd() * 0.05;
+        this.T[4].set([Math.cos(a) * rr, (rnd() - 0.5) * 0.05, Math.sin(a) * rr], i * 3);
+      } else {
+        const R = 1.28 + (i % 3) * 0.035;
+        this.T[4].set([Math.cos(th) * r * R, y * R, Math.sin(th) * r * R], i * 3);
+      }
+    }
+
+    // act 0 traffic arcs
+    this.arcs = [];
+
+    this.prevS = new Float32Array(N * 2);
+    this.px = new Float32Array(N); this.py = new Float32Array(N); this.pz = new Float32Array(N);
+    this.prad = new Float32Array(N); this.pal = new Float32Array(N); this.pcol = new Uint8Array(N);
+    this.order = new Array(N);
+    this.pos.set(this.T[0]);
+    for (let i = 0; i < N * 3; i++) this.pos[i] *= 1.9;
+    if (this.mask) this.applyGeo();
+  }
+
+  /* ---------- interaction ---------- */
+
+  storyLen() {
+    const inner = this.scroller.firstElementChild;
+    return Math.max(1, inner.offsetHeight - this.scroller.clientHeight);
+  }
+
+  goTo(k) {
+    if (!this.scroller) return;
+    this.scroller.scrollTo({ top: (k / (this.ACTS - 1)) * this.storyLen() * 0.999, behavior: 'smooth' });
+  }
+
+  readScroll() {
+    if (!this.scroller) return;
+    const st = this.scroller.scrollTop;
+    const delta = st - (this.lastTop == null ? st : this.lastTop);
+    this.lastTop = st;
+    this.velS = delta;
+    this.vel = Math.min(90, Math.abs(delta) + this.vel * 0.7);
+    this.af = Math.max(0, Math.min(1, st / this.storyLen())) * (this.ACTS - 1);
+  }
+
+  emitPulse() { this.pulses.push({ t: performance.now() }); if (this.pulses.length > 4) this.pulses.shift(); }
+
+  pointerDown(e) {
+    this.drag = { x: e.clientX, y: e.clientY, moved: 0 };
+    if (this.canvas) { this.canvas.style.cursor = 'grabbing'; try { this.canvas.setPointerCapture(e.pointerId); } catch (_) {} }
+  }
+
+  pointerMove(e) {
+    const r = this.canvas && this.canvas.getBoundingClientRect();
+    if (r) { this.mouse.x = e.clientX - r.left; this.mouse.y = e.clientY - r.top; this.mouse.on = true; }
+    if (!this.drag) return;
+    const dx = e.clientX - this.drag.x, dy = e.clientY - this.drag.y;
+    this.drag.x = e.clientX; this.drag.y = e.clientY;
+    this.drag.moved += Math.abs(dx) + Math.abs(dy);
+    this.dragYaw += dx * 0.005;
+    this.dragPitch = Math.max(-0.75, Math.min(0.75, this.dragPitch + dy * 0.004));
+  }
+
+  pointerUp(e) {
+    if (e && e.type === 'pointerleave') this.mouse.on = false;
+    if (this.canvas) this.canvas.style.cursor = 'grab';
+    if (this.drag && this.drag.moved < 6) {
+      const r = this.canvas && this.canvas.getBoundingClientRect();
+      const mx = r && e ? e.clientX - r.left : this.mouse.x;
+      const my = r && e ? e.clientY - r.top : this.mouse.y;
+      let hit = false;
+      const near = (list, cb) => {
+        if (!list) return;
+        let best = null, bd = 1e9;
+        list.forEach(p => {
+          const dx = mx - p[0], dy = my - p[1], d2 = dx * dx + dy * dy;
+          if (d2 < p[2] * p[2] && d2 < bd) { bd = d2; best = p[3]; }
+        });
+        if (best != null) { cb(best); hit = true; }
+      };
+      near(this.pickChars, v => this.setState({ ci: v }));
+      if (!hit) near(this.pickNodes, v => this.setState({ nid: v }));
+      if (!hit) this.emitPulse();
+    }
+    this.drag = null;
+  }
+
+  /* ---------- 3D stage scenes ---------- */
+
+  P(x, y, z, C) { return this.project(x, y, z, C.cy, C.sy, C.cp, C.sp, C.d, C.fov); }
+
+  glyph(ctx, ch, x, y, z, size, rgb, a, C, squash) {
+    const p = this.P(x, y, z, C);
+    if (!p) return null;
+    const fs = size * p[3];
+    if (fs < 1.2 || a < 0.01) return p;
+    ctx.save();
+    ctx.translate(p[0], p[1]);
+    if (squash != null) ctx.scale(Math.max(0.05, squash), 1);
+    ctx.font = '500 ' + fs.toFixed(1) + "px 'IBM Plex Mono', monospace";
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(' + rgb + ',' + Math.min(1, a).toFixed(3) + ')';
+    ctx.fillText(ch, 0, 0);
+    ctx.restore();
+    return p;
+  }
+
+  tag(ctx, text, p, dx, dy, px, rgb, a, align) {
+    if (!p || a < 0.02) return;
+    ctx.font = "500 " + px + "px 'IBM Plex Mono', monospace";
+    ctx.textAlign = align || 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(' + rgb + ',' + Math.min(1, a).toFixed(3) + ')';
+    ctx.fillText(text, p[0] + dx, p[1] + dy);
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+  }
+
+  poly(ctx, pts, rgb, a, wdt, close) {
+    const v = pts.filter(Boolean);
+    if (v.length < 2) return;
+    ctx.strokeStyle = 'rgba(' + rgb + ',' + Math.min(1, a).toFixed(3) + ')';
+    ctx.lineWidth = wdt || 1;
+    ctx.beginPath();
+    v.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1]));
+    if (close) ctx.closePath();
+    ctx.stroke();
+  }
+
+  box3(ctx, cx, cy, cz, hx, hy, hz, rgb, a, C) {
+    const V = [];
+    for (let i = 0; i < 8; i++) {
+      V.push(this.P(cx + (i & 1 ? hx : -hx), cy + (i & 2 ? hy : -hy), cz + (i & 4 ? hz : -hz), C));
+    }
+    const E = [[0,1],[1,3],[3,2],[2,0],[4,5],[5,7],[7,6],[6,4],[0,4],[1,5],[2,6],[3,7]];
+    ctx.strokeStyle = 'rgba(' + rgb + ',' + Math.min(1, a).toFixed(3) + ')';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    E.forEach(e => {
+      const p = V[e[0]], q = V[e[1]];
+      if (p && q) { ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); }
+    });
+    ctx.stroke();
+  }
+
+  ring3(ctx, cx, cy, cz, r, axis, rot, rgb, a, C, wdt) {
+    const pts = [];
+    for (let s = 0; s <= 44; s++) {
+      const t = s / 44 * Math.PI * 2;
+      let x = Math.cos(t) * r, y = 0, z = Math.sin(t) * r;
+      if (axis === 1) { y = Math.sin(t) * r; z = 0; x = Math.cos(t) * r; }
+      if (axis === 2) { y = Math.cos(t) * r; z = Math.sin(t) * r; x = 0; }
+      const cr = Math.cos(rot), sr = Math.sin(rot);
+      const nx = x * cr - z * sr, nz = x * sr + z * cr;
+      pts.push(this.P(cx + nx, cy + y, cz + nz, C));
+    }
+    this.poly(ctx, pts, rgb, a, wdt || 1, true);
+  }
+
+  sprite(ctx, p, r, ci, a) {
+    if (!p || a < 0.01) return;
+    ctx.globalAlpha = Math.min(1, a);
+    ctx.drawImage(this.sprites[ci], p[0] - r, p[1] - r, r * 2, r * 2);
+    ctx.globalAlpha = 1;
+  }
+
+  scenes() {
+    if (this._sc) return this._sc;
+    const A = this.analysis();
+    const u = A.u;
+
+    const groups = [
+      { label: 'PROTOCOL', text: u ? u.protocol + '//' : '', rgb: '146,166,214' },
+      { label: 'SUBDOMAIN', text: A.sub ? A.sub + '.' : '', rgb: '122,156,255' },
+      { label: 'DOMAIN', text: A.domain, rgb: '236,242,255' },
+      { label: 'PATH', text: A.path || '', rgb: '178,130,255' },
+      { label: 'QUERY', text: A.query || '', rgb: '255,196,110' }
+    ].filter(g => g.text);
+    const all = groups.map(g => g.text).join('');
+    const n = all.length, sp = Math.min(0.078, 2.2 / n);
+    let idx = 0;
+    groups.forEach((g, gi) => {
+      const m = g.text.length, sg = Math.min(0.1, 1.4 / m);
+      const ly = 0.66 - gi * 0.32, lz = 0.16 - gi * 0.09;
+      g.lane = [0, ly, lz];
+      g.chars = Array.from(g.text).map((ch, j) => {
+        const i = idx++;
+        return { ch, x0: (i - (n - 1) / 2) * sp, x1: (j - (m - 1) / 2) * sg, y1: ly, z1: lz };
+      });
+    });
+    const CODE = { url_length: 'len', entropy: 'H', hyphen_count: '\u2013', digit_count: '0-9', suspicious_kw: 'kw', subdomain_count: 'sub', path_depth: 'path', query_params: '?' };
+    const chips = A.feats.filter(f => CODE[f[0]]).slice(0, 8).map((f, k, arr) => {
+      const a = -0.95 + (k / Math.max(1, arr.length - 1)) * 1.9;
+      return { name: CODE[f[0]], val: f[1], hot: f[1] / f[2] > 0.5, p: [1.32, -Math.sin(a) * 0.86, Math.cos(a) * 0.2 - 0.05], lane: k % groups.length };
+    });
+
+    const host = A.D.homograph.suspect;
+    const hn = host.length;
+    const word = A.chars.map((c, i) => {
+      const uu = hn > 1 ? i / (hn - 1) : 0.5;
+      return { c, x: (uu - 0.5) * 2.15, y: 0, z: Math.sin(uu * Math.PI) * 0.26 - 0.08 };
+    });
+
+    const E = A.D.enrichment;
+    const rings = [[], [], []];
+    E.nodes.forEach(nd => rings[nd.ring].push(nd));
+    const net = E.nodes.map(nd => {
+      const list = rings[nd.ring], i = list.indexOf(nd);
+      if (!nd.ring) return { nd, r: 0, base: 0, y: 0, rad: 0.24 };
+      const rad = nd.ring === 1 ? 1.06 : 1.5;
+      const base = (i / list.length) * Math.PI * 2 + (nd.ring === 2 ? 0.4 : 0);
+      const y = nd.ring === 1 ? Math.sin(base * 1.3) * 0.3 : Math.sin(base * 0.9 + 1.2) * 0.62;
+      return { nd, r: rad, base, y, rad: nd.ring === 1 ? 0.15 : 0.105, spin: nd.ring === 1 ? 0.1 : -0.062 };
+    });
+    const netById = {};
+    net.forEach(o => { netById[o.nd.id] = o; });
+
+    const S = A.D.decision.signals;
+    const streams = S.map((s, k) => {
+      const a = (k / S.length) * Math.PI * 2;
+      const from = [Math.cos(a) * 1.34, Math.sin(a) * 0.9, Math.sin(a * 1.6) * 0.38];
+      return { s, from, ctrl: [from[0] * 0.45, from[1] * 0.45 + 0.28, from[2] * 0.45 - 0.35], a };
+    });
+
+    this._sc = { groups, chips, word, net, netById, streams, A };
+    return this._sc;
+  }
+
+  bez(f, c, t) {
+    const k = 1 - t;
+    return [
+      k * k * f[0] + 2 * k * t * c[0],
+      k * k * f[1] + 2 * k * t * c[1],
+      k * k * f[2] + 2 * k * t * c[2]
+    ];
+  }
+
+  sceneExtraction(ctx, C, af, time, W) {
+    const S = this.scenes();
+    const ph = Math.max(0, Math.min(1, (af - 0.58) / 0.5));
+    const e = ph * ph * (3 - 2 * ph);
+    const scan = -1.85 + 3.7 * ((time * 0.26) % 1);
+
+    const beam = [
+      this.P(scan, -1.15, -0.75, C), this.P(scan, 1.15, -0.75, C),
+      this.P(scan, 1.15, 0.85, C), this.P(scan, -1.15, 0.85, C)
+    ];
+    this.poly(ctx, beam, '150,190,255', 0.2 * W, 1, true);
+    const bt = this.P(scan, 1.15, 0.05, C);
+    this.tag(ctx, 'SCAN', bt, 0, -12, 9, '176,204,255', 0.5 * W, 'center');
+
+    S.groups.forEach((g, gi) => {
+      g.chars.forEach(ch => {
+        const x = ch.x0 + (ch.x1 - ch.x0) * e;
+        const y = ch.y1 * e, z = ch.z1 * e;
+        const near = Math.max(0, 1 - Math.abs(x - scan) / 0.22);
+        const a = (0.42 + 0.5 * e + near * 0.5) * W;
+        this.glyph(ctx, ch.ch, x, y, z, 0.1 + 0.03 * e + near * 0.02, g.rgb, a, C);
+        if (near > 0.35) {
+          const p = this.P(x, y, z, C);
+          this.sprite(ctx, p, 7 * near, 1, 0.5 * near * W);
+        }
+      });
+      const lp = this.P(-0.98, g.lane[1] * e, g.lane[2] * e, C);
+      this.tag(ctx, g.label, lp, -9, 0, 9, g.rgb, 0.72 * e * W, 'right');
+    });
+
+    const cp = Math.max(0, Math.min(1, (ph - 0.32) / 0.5));
+    S.chips.forEach((c, k) => {
+      if (cp < 0.02) return;
+      const puls = 0.75 + 0.25 * Math.sin(time * 1.6 + k);
+      const g = S.groups[c.lane % S.groups.length];
+      const from = this.P(g.lane[0], g.lane[1] * e, g.lane[2] * e, C);
+      const to = this.P(c.p[0] * cp, c.p[1] * cp, c.p[2] * cp, C);
+      this.poly(ctx, [from, to], c.hot ? '255,130,120' : '122,156,255', 0.16 * cp * W, 1);
+      this.sprite(ctx, to, 5.5, c.hot ? 2 : 1, 0.7 * cp * puls * W);
+      this.tag(ctx, c.name + '  ' + c.val, to, -9, 0, 9, c.hot ? '255,150,140' : '202,214,240', 0.85 * cp * W, 'right');
+    });
+  }
+
+  sceneHomograph(ctx, C, af, time, W) {
+    const S = this.scenes();
+    const A = S.A;
+    const ci = this.state.ci == null ? Math.max(0, A.firstBad) : this.state.ci;
+    const ph = Math.max(0, Math.min(1, (af - 1.62) / 0.5));
+    const e = ph * ph * (3 - 2 * ph);
+    const sweep = (time * 0.2) % 1;
+    const sx = -1.05 + 2.1 * sweep;
+    const picks = [];
+
+    this.ring3(ctx, sx, 0, 0.05, 0.62, 2, 0, '150,190,255', 0.34 * W, C, 1);
+    this.ring3(ctx, sx, 0, 0.05, 0.5, 2, 0, '150,190,255', 0.18 * W, C, 1);
+
+    S.word.forEach(o => {
+      const sel = o.c.i === ci;
+      const near = Math.max(0, 1 - Math.abs(o.x - sx) / 0.3);
+      const rgb = o.c.confusable ? '255,104,124' : '212,226,252';
+      let x = o.x, y = o.y, z = o.z, size = 0.15, a = (0.66 + near * 0.34) * W;
+      if (sel) {
+        x = o.x * (1 - e) + 0 * e;
+        y = o.y * (1 - e) + 0.52 * e;
+        z = o.z * (1 - e) + 1.0 * e;
+        size = 0.15 + 0.3 * e;
+        a = W;
+      } else {
+        y -= e * 0.24; z -= e * 0.1;
+        a *= 1 - 0.24 * e;
+      }
+      if (sel && e > 0.1) {
+        ctx.setLineDash([2, 4]);
+        this.box3(ctx, o.x, o.y, o.z, 0.075, 0.1, 0.02, '255,104,124', 0.34 * e * W, C);
+        ctx.setLineDash([]);
+      }
+      const sq = sel ? Math.cos(time * 0.55) : null;
+      const p = this.glyph(ctx, o.c.ch, x, y, z, size, rgb, a, C, sq);
+      if (p) picks.push([p[0], p[1], Math.max(13, size * p[3] * 0.62), o.c.i]);
+      if (o.c.confusable && !sel) {
+        this.sprite(ctx, p, 9, 2, 0.35 * W);
+        this.tag(ctx, '\u25b2', p, 0, size * (p ? p[3] : 0) * 0.75, 8, '255,120,130', 0.7 * W, 'center');
+      }
+      if (near > 0.78 && !sel) {
+        this.tag(ctx, o.c.hex, p, 0, -size * (p ? p[3] : 0) * 0.8, 8.5, '150,190,255', 0.7 * near * W, 'center');
+      }
+    });
+
+    if (e > 0.04) {
+      const F = A.chars[ci] || A.chars[0];
+      const bad = F.confusable;
+      const rgb = bad ? '255,104,124' : '206,220,248';
+      this.box3(ctx, 0, 0.52, 1.0, 0.2, 0.26, 0.2, rgb, 0.4 * e * W, C);
+      this.ring3(ctx, 0, 0.52, 1.0, 0.38, 0, time * 0.5, rgb, 0.3 * e * W, C, 1);
+      this.ring3(ctx, 0, 0.52, 1.0, 0.42, 1, -time * 0.36, rgb, 0.2 * e * W, C, 1);
+      const top = this.P(0, 0.86, 1.0, C);
+      this.tag(ctx, F.hex, top, 0, -8, 11, rgb, 0.95 * e * W, 'center');
+      this.tag(ctx, F.name, top, 0, 6, 8.5, '176,192,224', 0.75 * e * W, 'center');
+
+      if (bad) {
+        const tw = this.glyph(ctx, F.ascii, 0.78, 0.52, 1.0, 0.4, '120,235,180', 0.9 * e * W, C);
+        this.box3(ctx, 0.78, 0.52, 1.0, 0.16, 0.22, 0.16, '120,235,180', 0.3 * e * W, C);
+        this.tag(ctx, 'ASCII \u2018' + F.ascii + '\u2019', tw, 0, -34, 9, '120,235,180', 0.8 * e * W, 'center');
+        const l1 = this.P(0.22, 0.52, 1.0, C), l2 = this.P(0.58, 0.52, 1.0, C);
+        this.poly(ctx, [l1, l2], '255,190,120', 0.55 * e * W, 1);
+        const mid = this.P(0.4, 0.52, 1.0, C);
+        this.tag(ctx, '\u2248 ' + A.D.homograph.brandSimilarity.toFixed(2), mid, 0, -10, 9.5, '255,206,140', 0.9 * e * W, 'center');
+      }
+    }
+    this.pickChars = picks;
+  }
+
+  sceneEnrichment(ctx, C, af, time, W) {
+    const S = this.scenes();
+    const SEV = { malicious: '255,96,120', suspicious: '255,190,110', neutral: '168,180,208', new: '178,130,255' };
+    const SPR = { malicious: 2, suspicious: 6, neutral: 0, new: 4 };
+    const nid = this.state.nid || 'domain';
+    const ph = Math.max(0, Math.min(1, (af - 2.55) / 0.6));
+    const pos = {};
+    S.net.forEach(o => {
+      if (!o.r) { pos[o.nd.id] = [0, 0, 0]; return; }
+      const t = o.base + time * o.spin;
+      const grow = o.nd.ring === 2 ? Math.max(0, Math.min(1, (ph - 0.15) / 0.6)) : Math.max(0, Math.min(1, ph / 0.5));
+      const g = grow * grow * (3 - 2 * grow);
+      pos[o.nd.id] = [Math.cos(t) * o.r * g, o.y * g, Math.sin(t) * o.r * g];
+    });
+
+    S.A.D.enrichment.edges.forEach((ed, k) => {
+      const a = pos[ed[0]], b = pos[ed[1]];
+      if (!a || !b) return;
+      const rgb = SEV[ed[2]] || SEV.neutral;
+      const pts = [];
+      for (let s = 0; s <= 12; s++) {
+        const t = s / 12, lift = Math.sin(t * Math.PI) * 0.16;
+        pts.push(this.P(a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t + lift, a[2] + (b[2] - a[2]) * t, C));
+      }
+      this.poly(ctx, pts, rgb, (ed[2] === 'malicious' ? 0.3 : 0.18) * W, ed[2] === 'malicious' ? 1.3 : 1);
+      const t = (time * 0.34 + k * 0.17) % 1;
+      const i = Math.min(12, Math.floor(t * 12));
+      this.sprite(ctx, pts[i], 5, SPR[ed[2]], 0.75 * W);
+    });
+
+    const drawn = [];
+    S.net.forEach(o => {
+      const p = pos[o.nd.id];
+      const pr = this.P(p[0], p[1], p[2], C);
+      if (!pr) return;
+      drawn.push({ o, pr });
+    });
+    drawn.sort((a, b) => b.pr[2] - a.pr[2]);
+    const picks = [];
+    drawn.forEach(({ o, pr }) => {
+      const sel = o.nd.id === nid;
+      const rgb = SEV[o.nd.sev] || SEV.neutral;
+      const r = o.rad * pr[3];
+      const puls = 0.8 + 0.2 * Math.sin(time * 1.5 + o.base * 3);
+      this.sprite(ctx, pr, r * (sel ? 2.3 : 1.7) * puls, SPR[o.nd.sev], (sel ? 0.95 : 0.62) * W);
+      if (!o.r) {
+        this.ring3(ctx, 0, 0, 0, 0.42, 0, time * 0.3, rgb, 0.4 * W, C, 1.2);
+        this.ring3(ctx, 0, 0, 0, 0.46, 1, -time * 0.22, rgb, 0.26 * W, C, 1);
+      }
+      if (sel) {
+        ctx.strokeStyle = 'rgba(190,214,255,' + (0.75 * W).toFixed(3) + ')';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath(); ctx.arc(pr[0], pr[1], r * 2.6 + 7, 0, 6.2832); ctx.stroke();
+      }
+      const showLabel = sel || o.nd.ring < 2 || Math.sin(time * 0.5 + o.base * 2) > 0.1;
+      const ly = o.nd.ring === 1 ? -(r * 2.1 + 9) : r * 2.1 + (o.nd.ring ? 10 : 17);
+      if (showLabel) this.tag(ctx, o.nd.label, pr, 0, ly, o.r ? 8.5 : 11, sel ? '236,244,255' : '184,198,226', (sel ? 1 : 0.62) * W, 'center');
+      if (sel) this.tag(ctx, o.nd.type, pr, 0, ly + (ly < 0 ? -11 : 11), 8.5, rgb, 0.9 * W, 'center');
+      picks.push([pr[0], pr[1], Math.max(15, r * 2.4), o.nd.id]);
+    });
+    this.pickNodes = picks;
+  }
+
+  sceneDecision(ctx, C, af, time, W) {
+    const S = this.scenes();
+    const A = S.A;
+    const ph = Math.max(0, Math.min(1, (af - 3.5) / 0.55));
+    const e = ph * ph * (3 - 2 * ph);
+    const VC = A.verdict === 'MALICIOUS' ? '255,96,120' : A.verdict === 'SUSPICIOUS' ? '255,190,110' : '104,236,180';
+    const VS = A.verdict === 'MALICIOUS' ? 2 : A.verdict === 'SUSPICIOUS' ? 6 : 3;
+
+    const core = this.P(0, 0, 0, C) || [this.ox, this.oy, C.d, C.fov / C.d];
+    const placed = [];
+    S.streams.forEach((st, k) => {
+      const hot = st.s.score >= 80, warm = st.s.score >= 65;
+      const rgb = hot ? '255,96,120' : warm ? '255,190,110' : '122,156,255';
+      const pts = [];
+      for (let s = 0; s <= 16; s++) {
+        const q = this.bez(st.from, st.ctrl, s / 16);
+        pts.push(this.P(q[0], q[1], q[2], C));
+      }
+      this.poly(ctx, pts, rgb, 0.2 * W, 1);
+      const cnt = 2 + Math.round(st.s.score / 26);
+      for (let i = 0; i < cnt; i++) {
+        const t = ((time * (0.16 + st.s.score / 620) + i / cnt + k * 0.13) % 1);
+        const q = this.bez(st.from, st.ctrl, t * (0.2 + 0.8 * e));
+        const p = this.P(q[0], q[1], q[2], C);
+        this.sprite(ctx, p, 4.6 + 2.4 * (1 - t), hot ? 2 : warm ? 6 : 1, (0.42 + 0.5 * t) * W);
+      }
+      const hp = this.P(st.from[0], st.from[1], st.from[2], C);
+      const inward = st.from[0] > 0 ? -1 : 1;
+      const al = inward > 0 ? 'left' : 'right';
+      let ny = 0;
+      if (hp) {
+        const edge = hp[0] + inward * 13;
+        const intoCore = inward > 0 ? edge > core[0] - 78 : edge < core[0] + 78;
+        const dy = hp[1] - core[1];
+        if (intoCore && Math.abs(dy) < 92) {
+          const up = -(92 + dy), down = 92 - dy, limit = this.h - 244;
+          ny = (dy >= 0 && hp[1] + down + 10 < limit) ? down : up;
+        }
+        const wide = 104;
+        const x0 = inward > 0 ? hp[0] + 13 : hp[0] - 13 - wide;
+        const dir = ny <= 0 ? -1 : 1;
+        for (let guard = 0; guard < 8; guard++) {
+          const y = hp[1] + ny;
+          const clash = placed.some(b => Math.abs(b.y - y) < 22 && x0 < b.x1 && x0 + wide > b.x0);
+          if (!clash) break;
+          ny += dir * 24;
+        }
+        placed.push({ x0, x1: x0 + wide, y: hp[1] + ny });
+      }
+      this.sprite(ctx, hp, 7, hot ? 2 : warm ? 6 : 1, 0.8 * W);
+      this.tag(ctx, st.s.label.toUpperCase(), hp, inward * 13, ny - 7, 8.5, '190,204,232', 0.85 * W, al);
+      this.tag(ctx, String(st.s.score) + '  \u00b7  ' + st.s.stage, hp, inward * 13, ny + 5, 8, rgb, 0.8 * W, al);
+    });
+
+    const puls = 0.86 + 0.14 * Math.sin(time * 2.1);
+    this.sprite(ctx, core, (26 + 16 * e) * puls, e > 0.4 ? VS : 1, (0.7 + 0.3 * e) * W);
+    const rgbCore = e > 0.4 ? VC : '122,156,255';
+    this.ring3(ctx, 0, 0, 0, 0.5 + 0.12 * e, 0, time * 0.42, rgbCore, 0.55 * W, C, 1.3);
+    this.ring3(ctx, 0, 0, 0, 0.56 + 0.12 * e, 1, -time * 0.3, rgbCore, 0.35 * W, C, 1);
+    this.ring3(ctx, 0, 0, 0, 0.62 + 0.12 * e, 2, time * 0.24, rgbCore, 0.22 * W, C, 1);
+    ctx.font = "600 " + (20 + 10 * e).toFixed(0) + "px 'Space Grotesk', sans-serif";
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(' + rgbCore + ',' + (0.95 * W).toFixed(3) + ')';
+    ctx.fillText(String(A.risk), core[0], core[1]);
+    ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+
+    if (e > 0.05) {
+      for (let r = 0; r < 2; r++) {
+        const t = ((time * 0.45 + r * 0.5) % 1);
+        ctx.strokeStyle = 'rgba(' + VC + ',' + ((1 - t) * 0.4 * e * W).toFixed(3) + ')';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(core[0], core[1], 30 + t * 120, 0, 6.2832); ctx.stroke();
+      }
+      ctx.font = "600 " + (13 + 4 * e).toFixed(0) + "px 'Space Grotesk', sans-serif";
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = 'rgba(' + VC + ',' + (e * W).toFixed(3) + ')';
+      ctx.fillText(A.verdict, core[0], core[1] + 28 + 6 * e);
+      ctx.textAlign = 'start'; ctx.textBaseline = 'alphabetic';
+    }
+  }
+
+  /* ---------- render ---------- */
+
+  resize() {
+    if (!this.canvas) return;
+    const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+    const w = this.canvas.clientWidth, h = this.canvas.clientHeight;
+    if (!w || !h) return;
+    this.canvas.width = Math.round(w * dpr);
+    this.canvas.height = Math.round(h * dpr);
+    this.w = w; this.h = h; this.dpr = dpr;
+    this.ctx = this.canvas.getContext('2d');
+    if (!this.glowC) { this.glowC = document.createElement('canvas'); this.glowX = this.glowC.getContext('2d'); }
+    this.glowC.width = Math.max(2, Math.round(w / 4));
+    this.glowC.height = Math.max(2, Math.round(h / 4));
+    this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.ctx.fillStyle = '#0d0e15';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+
+  /* ---------- real geography (Natural Earth 110m via world-atlas) ---------- */
+
+  makeRoutes() {
+    const C = {
+      moscow: [55.75, 37.62, 'RU'], beijing: [39.9, 116.4, 'CN'], saopaulo: [-23.55, -46.63, 'BR'],
+      lagos: [6.52, 3.38, 'NG'], mumbai: [19.08, 72.88, 'IN'], amsterdam: [52.37, 4.9, 'NL'],
+      singapore: [1.35, 103.82, 'SG'], seoul: [37.57, 126.98, 'KR'], frankfurt: [50.11, 8.68, 'DE'],
+      ashburn: [39.04, -77.49, 'US'], dallas: [32.78, -96.8, 'US'], london: [51.51, -0.13, 'GB'],
+      sydney: [-33.87, 151.21, 'AU'], tehran: [35.69, 51.39, 'IR'], kyiv: [50.45, 30.52, 'UA'],
+      istanbul: [41.01, 28.98, 'TR'], toronto: [43.65, -79.38, 'CA'], tokyo: [35.68, 139.69, 'JP']
+    };
+    const v3 = ([lat, lon]) => {
+      const p = lat * Math.PI / 180, l = lon * Math.PI / 180, r = Math.cos(p);
+      return [Math.cos(l) * r, Math.sin(p), Math.sin(l) * r];
+    };
+    const defs = [
+      ['moscow', 'ashburn', 'Credential phishing', 2],
+      ['beijing', 'frankfurt', 'Typosquat batch', 4],
+      ['lagos', 'london', 'Brand impersonation', 2],
+      ['saopaulo', 'dallas', 'Malware dropper', 2],
+      ['tehran', 'amsterdam', 'C2 beacon', 4],
+      ['singapore', 'sydney', 'Port scan', 1],
+      ['seoul', 'tokyo', 'Botnet enrol', 4],
+      ['mumbai', 'toronto', 'Homograph domain', 2],
+      ['istanbul', 'frankfurt', 'Fast-flux DNS', 1],
+      ['kyiv', 'ashburn', 'Credential stuffing', 2]
+    ];
+    this.routes = defs.map((r, k) => {
+      const s = C[r[0]], t = C[r[1]];
+      return {
+        a: v3(s), b: v3(t), from: s[2], to: t[2], label: r[2], col: r[3],
+        off: (k * 0.137) % 1, sp: 0.15 + (k % 4) * 0.022
+      };
+    });
+    this.feedAt = 0;
+  }
+
+  async loadGeo() {
+    try {
+      const res = await fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json');
+      const topo = await res.json();
+      const sc = topo.transform.scale, tl = topo.transform.translate;
+      const arcs = topo.arcs.map(a => {
+        let x = 0, y = 0; const out = [];
+        for (let n = 0; n < a.length; n++) { x += a[n][0]; y += a[n][1]; out.push([x * sc[0] + tl[0], y * sc[1] + tl[1]]); }
+        return out;
+      });
+      const ring = ids => {
+        const pts = [];
+        ids.forEach(id => {
+          const a = id < 0 ? arcs[~id].slice().reverse() : arcs[id];
+          for (let n = pts.length ? 1 : 0; n < a.length; n++) pts.push(a[n]);
+        });
+        return pts;
+      };
+      const polys = [];
+      topo.objects.countries.geometries.forEach(g => {
+        if (g.type === 'Polygon') polys.push(g.arcs.map(ring));
+        else if (g.type === 'MultiPolygon') g.arcs.forEach(p => polys.push(p.map(ring)));
+      });
+
+      const W = 1024, H = 512;
+      const cv = document.createElement('canvas');
+      cv.width = W; cv.height = H;
+      const g2 = cv.getContext('2d');
+      g2.fillStyle = '#000'; g2.fillRect(0, 0, W, H);
+      g2.fillStyle = '#fff';
+      polys.forEach(rings => {
+        let lo = 1e9, hi = -1e9;
+        rings.forEach(r => r.forEach(p => { if (p[0] < lo) lo = p[0]; if (p[0] > hi) hi = p[0]; }));
+        const wrap = hi - lo > 180;
+        for (let pass = 0; pass < (wrap ? 2 : 1); pass++) {
+          const shift = pass ? -W : 0;
+          g2.beginPath();
+          rings.forEach(r => {
+            for (let n = 0; n < r.length; n++) {
+              const lon = wrap && r[n][0] < 0 ? r[n][0] + 360 : r[n][0];
+              const X = (lon + 180) / 360 * W + shift, Y = (90 - r[n][1]) / 180 * H;
+              n ? g2.lineTo(X, Y) : g2.moveTo(X, Y);
+            }
+            g2.closePath();
+          });
+          g2.fill();
+        }
+      });
+      this.mask = { W, H, data: g2.getImageData(0, 0, W, H).data };
+      Component.MASK = this.mask;
+      this.applyGeo();
+      this.geoReady = true;
+      window.__tfGeo = { ready: true, land: this.landCount || 0, N: this.N };
+    } catch (err) {
+      this.geoReady = false;
+      window.__tfGeo = { ready: false, err: String(err && err.message || err) };
+    }
+  }
+
+  applyGeo() {
+    const mask = this.mask, N = this.N;
+    if (!mask || !N) return;
+    const at = (lat, lon) => {
+      const x = Math.min(mask.W - 1, Math.max(0, Math.floor((lon + 180) / 360 * mask.W)));
+      const y = Math.min(mask.H - 1, Math.max(0, Math.floor((90 - lat) / 180 * mask.H)));
+      return mask.data[(y * mask.W + x) * 4] > 120;
+    };
+    const M = Math.max(6000, N * 5), GA = Math.PI * (3 - Math.sqrt(5)), DEG = 180 / Math.PI;
+    const land = [], sea = [];
+    for (let k = 0; k < M; k++) {
+      const y = 1 - (k / (M - 1)) * 2, r = Math.sqrt(Math.max(0, 1 - y * y)), th = GA * k;
+      const x = Math.cos(th) * r, z = Math.sin(th) * r;
+      (at(Math.asin(y) * DEG, Math.atan2(z, x) * DEG) ? land : sea).push(x, y, z);
+    }
+    const lc = land.length / 3, sn = sea.length / 3;
+    this.landCount = lc;
+    if (lc < 50) return;
+    this.isLand = new Uint8Array(N);
+    const quota = Math.min(Math.round(N * 0.84), lc);
+    for (let i = 0; i < N; i++) {
+      const onLand = i < quota;
+      const src = onLand ? land : sea;
+      const cnt = onLand ? lc : sn;
+      const idx = onLand
+        ? Math.floor(i * cnt / quota) % cnt
+        : Math.floor((i - quota) * cnt / Math.max(1, N - quota)) % cnt;
+      const R = onLand ? 1.012 : 0.955;
+      this.isLand[i] = onLand ? 1 : 0;
+      this.T[0].set([src[idx * 3] * R, src[idx * 3 + 1] * R, src[idx * 3 + 2] * R], i * 3);
+    }
+  }
+
+  occluded(pr, d, fov) {
+    if (pr[2] <= d) return false;
+    const dx = pr[0] - this.ox, dy = pr[1] - this.oy;
+    const rs = fov / Math.sqrt(Math.max(0.05, d * d - 1));
+    return dx * dx + dy * dy < rs * rs;
+  }
+
+  makeSprites() {    this.sprites = Component.PAL.map(p => {
+      const S = 64, c = document.createElement('canvas');
+      c.width = c.height = S;
+      const g = c.getContext('2d');
+      const rgb = p[0] + ',' + p[1] + ',' + p[2];
+      const rg = g.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+      rg.addColorStop(0, 'rgba(' + rgb + ',1)');
+      rg.addColorStop(0.3, 'rgba(' + rgb + ',0.86)');
+      rg.addColorStop(0.58, 'rgba(' + rgb + ',0.22)');
+      rg.addColorStop(1, 'rgba(' + rgb + ',0)');
+      g.fillStyle = rg;
+      g.fillRect(0, 0, S, S);
+      return c;
+    });
+  }
+
+  static get PAL() {
+    return [[172, 186, 224], [122, 156, 255], [255, 92, 116], [86, 232, 175], [178, 130, 255], [88, 112, 156], [206, 222, 255]];
+  }
+
+  project(x, y, z, cy, sy, cp, sp, d, fov) {
+    const x1 = x * cy + z * sy, z1 = z * cy - x * sy;
+    const y1 = y * cp - z1 * sp, z2 = z1 * cp + y * sp + d;
+    if (z2 < 0.25) return null;
+    const s = fov / z2;
+    let ax = x1 * s, ay = y1 * s;
+    if (this.rollS) { const t = ax * this.rollC - ay * this.rollS; ay = ax * this.rollS + ay * this.rollC; ax = t; }
+    return [this.ox + ax, this.oy + ay, z2, s];
+  }
+
+  frame(now) {
+    if (!this.ctx || !this.w) { this.resize(); if (!this.ctx) return; }
+    const ctx = this.ctx, w = this.w, h = this.h, time = (now - this.t0) / 1000;
+    const dt = Math.max(6, Math.min(48, now - (this.prevNow || now - 16)));
+    this.prevNow = now;
+    const step = dt / 16.7;
+
+    const before = this.afSmooth;
+    this.afSmooth += (this.af - this.afSmooth) * Math.min(1, 0.085 * step);
+    const af = this.afSmooth;
+    const A = Math.max(0, Math.min(3, Math.floor(af)));
+    const B = Math.min(4, A + 1);
+    const raw = Math.max(0, Math.min(1, af - A));
+    const e = raw * raw * (3 - 2 * raw);
+    const wt = k => Math.max(0, 1 - Math.abs(af - k) / 0.85);
+    const w0 = wt(0), w1 = wt(1), w2 = wt(2), w3 = wt(3), w4 = wt(4);
+    const sceneW = Math.max(w1, Math.max(w2, Math.max(w3, w4)));
+    const vizDim = 1 - 0.9 * sceneW;
+
+    this.vel = Math.max(0, this.vel * Math.pow(0.86, step) - 0.15);
+    const energy = Math.min(1, Math.abs(af - before) * 24 + Math.min(0.75, this.vel / 48));
+
+    const idx = Math.round(af);
+    if (idx !== this.actIdx) { this.actIdx = idx; if (!this.reduce) this.flash = now; }
+
+    if (this.state.orbit && !this.drag && !this.reduce) this.spin += 0.0016 * step;
+    const faceOn = Math.max(w1, Math.max(w2, w4));
+    const yawFree = 0.4 + this.spin + this.dragYaw + af * 0.22;
+    const yaw = yawFree * (1 - faceOn) + (this.dragYaw * 0.35 + Math.sin(time * 0.18) * 0.05) * faceOn;
+    const pitch = (-0.16 + this.dragPitch) * (1 - faceOn * 0.55) + faceOn * 0.03;
+    const zoomBy = [4.15, 3.15, 3.35, 3.95, 3.4];
+    const d = zoomBy[A] + (zoomBy[B] - zoomBy[A]) * e;
+    const fov = Math.min(w, h) * 0.62;
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const rollT = Math.max(-0.045, Math.min(0.045, (this.velS || 0) * 0.0007));
+    this.roll += (rollT - this.roll) * Math.min(1, 0.08 * step);
+    this.rollC = Math.cos(this.roll); this.rollS = Math.sin(this.roll);
+    const cw = w > 980 ? 0.7 : w > 760 ? 0.66 : 0.6;
+    this.ox = w * (cw - 0.022 * sceneW);
+    this.oy = h * (0.5 - 0.085 * sceneW);
+
+    const TINT = [[126, 158, 255], [126, 158, 255], [255, 96, 120], [178, 130, 255], [92, 232, 178]];
+    const ta = TINT[A], tb = TINT[B];
+    const tint = Math.round(ta[0] + (tb[0] - ta[0]) * e) + ',' +
+                 Math.round(ta[1] + (tb[1] - ta[1]) * e) + ',' +
+                 Math.round(ta[2] + (tb[2] - ta[2]) * e);
+
+    const trail = this.reduce ? 0 : Math.max(0, Math.min(1, this.props.trailLength ?? 0.5));
+    let fade = Math.max(0.09, Math.min(1, (0.66 - 0.4 * trail - 0.3 * energy) * step));
+    if (w0 > 0.3) fade = Math.max(fade, Math.min(1, (0.55 + 0.45 * w0) * step));
+    const bright = Math.max(0.5, Math.min(1, fade / 0.46));
+
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(13,14,21,' + fade.toFixed(3) + ')';
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.globalCompositeOperation = 'lighter';
+    const bgg = ctx.createRadialGradient(this.ox, h * 0.47, 0, this.ox, h * 0.47, Math.max(w, h) * 0.55);
+    bgg.addColorStop(0, 'rgba(' + tint + ',' + (0.1 * fade).toFixed(4) + ')');
+    bgg.addColorStop(1, 'rgba(' + tint + ',0)');
+    ctx.fillStyle = bgg;
+    ctx.fillRect(0, 0, w, h);
+
+    const pulses = this.pulses.filter(p => now - p.t < 2600);
+    this.pulses = pulses;
+
+    // globe body (act 0) — solid ocean disc so continents read against it
+    const rs = fov / Math.sqrt(Math.max(0.05, d * d - 1));
+    if (this.geoReady && w0 > 0.03) {
+      ctx.globalCompositeOperation = 'source-over';
+      const og = ctx.createRadialGradient(this.ox - rs * 0.3, this.oy - rs * 0.35, rs * 0.1, this.ox, this.oy, rs);
+      og.addColorStop(0, 'rgba(17,25,48,' + (0.96 * w0).toFixed(3) + ')');
+      og.addColorStop(0.72, 'rgba(11,15,29,' + (0.96 * w0).toFixed(3) + ')');
+      og.addColorStop(1, 'rgba(7,9,17,' + (0.98 * w0).toFixed(3) + ')');
+      ctx.fillStyle = og;
+      ctx.beginPath(); ctx.arc(this.ox, this.oy, rs, 0, 6.2832); ctx.fill();
+      ctx.globalCompositeOperation = 'lighter';
+      const ag = ctx.createRadialGradient(this.ox, this.oy, rs * 0.86, this.ox, this.oy, rs * 1.22);
+      ag.addColorStop(0, 'rgba(96,132,220,0)');
+      ag.addColorStop(0.55, 'rgba(110,146,235,' + (0.16 * w0).toFixed(3) + ')');
+      ag.addColorStop(1, 'rgba(110,146,235,0)');
+      ctx.fillStyle = ag;
+      ctx.beginPath(); ctx.arc(this.ox, this.oy, rs * 1.22, 0, 6.2832); ctx.fill();
+      ctx.strokeStyle = 'rgba(150,180,255,' + (0.3 * w0).toFixed(3) + ')';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(this.ox, this.oy, rs, 0, 6.2832); ctx.stroke();
+    }
+    ctx.globalCompositeOperation = 'lighter';
+
+    const TA = this.T[A], TB = this.T[B], pos = this.pos, prevS = this.prevS;
+    const PAL = Component.PAL;
+    const px = this.px, py = this.py, pz = this.pz, prad = this.prad, palA = this.pal, pcol = this.pcol;
+    const order = this.order;
+    const segs = [[], [], [], [], [], [], []];
+    const mOn = this.mouse.on, mx = this.mouse.x, my = this.mouse.y;
+    let cnt = 0;
+
+    for (let i = 0; i < this.N; i++) {
+      const j = i * 3, q2 = i * 2;
+      const tx = TA[j] + (TB[j] - TA[j]) * e;
+      const ty = TA[j + 1] + (TB[j + 1] - TA[j + 1]) * e;
+      const tz = TA[j + 2] + (TB[j + 2] - TA[j + 2]) * e;
+      const k = Math.min(0.55, this.ease[i] * step);
+      pos[j] += (tx - pos[j]) * k;
+      pos[j + 1] += (ty - pos[j + 1]) * k;
+      pos[j + 2] += (tz - pos[j + 2]) * k;
+
+      let x = pos[j], y = pos[j + 1], z = pos[j + 2];
+      const dist = Math.sqrt(x * x + y * y + z * z) || 1e-4;
+
+      for (let q = 0; q < pulses.length; q++) {
+        const age = (now - pulses[q].t) / 1000;
+        const g = Math.exp(-Math.pow(dist - age * 1.5, 2) / 0.012) * 0.42 * Math.max(0, 1 - age / 2.6);
+        if (g > 0.001) { const s = g / dist; x += pos[j] * s; y += pos[j + 1] * s; z += pos[j + 2] * s; }
+      }
+
+      if (!this.reduce) {
+        x += Math.sin(time * 0.7 + i) * 0.012;
+        y += Math.cos(time * 0.62 + i * 1.3) * 0.012;
+      }
+
+      const pr = this.project(x, y, z, cy, sy, cp, sp, d, fov);
+      if (!pr) { prevS[q2] = 0; prevS[q2 + 1] = 0; continue; }
+      let sx = pr[0], sy2 = pr[1];
+      const zc = pr[2], sc = pr[3];
+      if (sx < -80 || sx > w + 80 || sy2 < -80 || sy2 > h + 80) { prevS[q2] = 0; prevS[q2 + 1] = 0; continue; }
+      if (this.geoReady && w0 > 0.5 && zc > d) { prevS[q2] = 0; prevS[q2 + 1] = 0; continue; }
+
+      let boost = 0;
+      if (mOn) {
+        const ddx = sx - mx, ddy = sy2 - my, dd2 = ddx * ddx + ddy * ddy;
+        if (dd2 < 26000) {
+          const f = 1 - dd2 / 26000;
+          const push = f * f * 30 / Math.max(26, Math.sqrt(dd2));
+          sx += ddx * push; sy2 += ddy * push;
+          boost = f * f * 0.45;
+        }
+      }
+
+      let c = 0;
+      if (this.hostile[i]) c = w4 > 0.45 ? 3 : (w2 > 0.25 || w3 > 0.5 ? 2 : 0);
+      else if (this.core[i]) c = 1;
+      else if (w4 > 0.5) c = 4;
+      if (this.geoReady && w0 > 0.4) c = this.isLand[i] ? 6 : 5;
+
+      let a = Math.min(1, Math.max(0.08, (1.75 / zc) * 0.72));
+      if (c === 2) a = Math.min(1, a * 1.45);
+      if (c === 5) a *= 0.14;
+      if (c === 6) a = Math.min(1, a * 1.85);
+      a *= vizDim;
+      if (w0 > 0.35 && zc > d) a *= 1 - 0.72 * w0;
+      a = Math.min(1, (a + boost) * bright);
+
+      const ox = prevS[q2], oy = prevS[q2 + 1];
+      prevS[q2] = sx; prevS[q2 + 1] = sy2;
+      if (ox !== 0 || oy !== 0) {
+        const vx = sx - ox, vy = sy2 - oy, vm = vx * vx + vy * vy;
+        if (vm > 12 && vm < 120000) segs[c].push(ox, oy, sx, sy2);
+      }
+
+      px[cnt] = sx; py[cnt] = sy2; pz[cnt] = zc;
+      prad[cnt] = Math.max(0.62, Math.min(3.4, sc * 0.0098)) * (c === 5 ? 0.6 : c === 6 ? 1.4 : 1);
+      palA[cnt] = a; pcol[cnt] = c;
+      order[cnt] = cnt;
+      cnt++;
+    }
+
+    // velocity streaks
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 1.05;
+    for (let c = 0; c < 7; c++) {
+      const s = segs[c];
+      if (s.length < 4) continue;
+      const p = PAL[c];
+      ctx.strokeStyle = 'rgba(' + p[0] + ',' + p[1] + ',' + p[2] + ',' + (0.1 + 0.22 * energy).toFixed(3) + ')';
+      ctx.beginPath();
+      for (let n = 0; n < s.length; n += 4) { ctx.moveTo(s[n], s[n + 1]); ctx.lineTo(s[n + 2], s[n + 3]); }
+      ctx.stroke();
+    }
+
+    // depth-sorted soft sprites
+    order.length = cnt;
+    order.sort((a, b) => pz[b] - pz[a]);
+    const sprites = this.sprites;
+    for (let n = 0; n < cnt; n++) {
+      const i = order[n];
+      const r = prad[i] * 2.55;
+      ctx.globalAlpha = palA[i];
+      ctx.drawImage(sprites[pcol[i]], px[i] - r, py[i] - r, r * 2, r * 2);
+    }
+    ctx.globalAlpha = 1;
+
+    // act 0 — geographic threat map: graticule + geolocated attack arcs
+    if (w0 > 0.02) {
+      const gc = (a, b, t) => {
+        const dot = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]));
+        const om = Math.acos(dot);
+        const so = Math.sin(om) || 1e-6;
+        const k1 = Math.sin((1 - t) * om) / so, k2 = Math.sin(t * om) / so;
+        const lift = 1 + Math.sin(t * Math.PI) * 0.3;
+        return [(a[0] * k1 + b[0] * k2) * lift, (a[1] * k1 + b[1] * k2) * lift, (a[2] * k1 + b[2] * k2) * lift];
+      };
+
+      if (this.geoReady) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(120,150,210,' + (0.1 * w0).toFixed(3) + ')';
+        for (let la = -60; la <= 60; la += 30) {
+          const p = la * Math.PI / 180, rr = Math.cos(p), yy = Math.sin(p);
+          ctx.beginPath();
+          let on = false;
+          for (let s = 0; s <= 72; s++) {
+            const th = s / 72 * Math.PI * 2;
+            const pr = this.project(Math.cos(th) * rr, yy, Math.sin(th) * rr, cy, sy, cp, sp, d, fov);
+            if (!pr || this.occluded(pr, d, fov)) { on = false; continue; }
+            on ? ctx.lineTo(pr[0], pr[1]) : ctx.moveTo(pr[0], pr[1]);
+            on = true;
+          }
+          ctx.stroke();
+        }
+        for (let lo = 0; lo < 180; lo += 30) {
+          const l = lo * Math.PI / 180;
+          ctx.beginPath();
+          let on = false;
+          for (let s = 0; s <= 48; s++) {
+            const p = (-Math.PI / 2) + (s / 48) * Math.PI * 2;
+            const pr = this.project(Math.cos(l) * Math.cos(p), Math.sin(p), Math.sin(l) * Math.cos(p), cy, sy, cp, sp, d, fov);
+            if (!pr || this.occluded(pr, d, fov)) { on = false; continue; }
+            on ? ctx.lineTo(pr[0], pr[1]) : ctx.moveTo(pr[0], pr[1]);
+            on = true;
+          }
+          ctx.stroke();
+        }
+      }
+
+      const SEG = 24;
+      this.routes.forEach(rt => {
+        const P = [], VIS = [];
+        for (let s = 0; s <= SEG; s++) {
+          const q = gc(rt.a, rt.b, s / SEG);
+          const pr = this.project(q[0], q[1], q[2], cy, sy, cp, sp, d, fov);
+          P.push(pr);
+          VIS.push(!!pr && !this.occluded(pr, d, fov));
+        }
+        const cl = PAL[rt.col];
+        const rgb = cl[0] + ',' + cl[1] + ',' + cl[2];
+
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(' + rgb + ',' + (0.13 * w0).toFixed(3) + ')';
+        ctx.beginPath();
+        let on = false;
+        for (let s = 0; s <= SEG; s++) {
+          if (!VIS[s]) { on = false; continue; }
+          on ? ctx.lineTo(P[s][0], P[s][1]) : ctx.moveTo(P[s][0], P[s][1]);
+          on = true;
+        }
+        ctx.stroke();
+
+        const t = (time * rt.sp + rt.off) % 1;
+        const head = Math.min(SEG, Math.floor(t * SEG));
+        ctx.lineWidth = 1.9;
+        for (let s = Math.max(1, head - 6); s <= head; s++) {
+          if (!VIS[s] || !VIS[s - 1]) continue;
+          const f = 1 - (head - s) / 6;
+          ctx.strokeStyle = 'rgba(' + rgb + ',' + (f * f * 0.85 * w0).toFixed(3) + ')';
+          ctx.beginPath();
+          ctx.moveTo(P[s - 1][0], P[s - 1][1]);
+          ctx.lineTo(P[s][0], P[s][1]);
+          ctx.stroke();
+        }
+        if (VIS[head]) {
+          ctx.globalAlpha = w0;
+          ctx.drawImage(this.sprites[rt.col], P[head][0] - 9, P[head][1] - 9, 18, 18);
+          ctx.globalAlpha = 1;
+        }
+
+        const src = this.project(rt.a[0], rt.a[1], rt.a[2], cy, sy, cp, sp, d, fov);
+        if (src && !this.occluded(src, d, fov)) {
+          ctx.fillStyle = 'rgba(' + rgb + ',' + (0.75 * w0).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(src[0], src[1], 1.7, 0, 6.2832); ctx.fill();
+        }
+        const tgt = this.project(rt.b[0], rt.b[1], rt.b[2], cy, sy, cp, sp, d, fov);
+        if (tgt && !this.occluded(tgt, d, fov)) {
+          ctx.fillStyle = 'rgba(' + rgb + ',' + (0.8 * w0).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(tgt[0], tgt[1], 2.1, 0, 6.2832); ctx.fill();
+          if (t > 0.88) {
+            const f = (t - 0.88) / 0.12;
+            ctx.strokeStyle = 'rgba(' + rgb + ',' + ((1 - f) * 0.6 * w0).toFixed(3) + ')';
+            ctx.lineWidth = 1.3;
+            ctx.beginPath(); ctx.arc(tgt[0], tgt[1], 3 + f * 26, 0, 6.2832); ctx.stroke();
+          }
+        }
+      });
+    }
+
+    const CAM = { cy, sy, cp, sp, d, fov };
+    const labelPts = [];
+    if (w1 > 0.02) this.sceneExtraction(ctx, CAM, af, time, w1);
+    if (w2 > 0.02) this.sceneHomograph(ctx, CAM, af, time, w2);
+    if (w3 > 0.02) this.sceneEnrichment(ctx, CAM, af, time, w3);
+    if (w4 > 0.02) this.sceneDecision(ctx, CAM, af, time, w4);
+    if (w2 < 0.02) this.pickChars = null;
+    if (w3 < 0.02) this.pickNodes = null;
+
+    // cursor field reticle
+    if (mOn && !this.reduce) {
+      ctx.strokeStyle = 'rgba(' + tint + ',0.34)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(mx, my, 27, 0, 6.2832); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(mx - 42, my); ctx.lineTo(mx - 33, my);
+      ctx.moveTo(mx + 33, my); ctx.lineTo(mx + 42, my);
+      ctx.moveTo(mx, my - 42); ctx.lineTo(mx, my - 33);
+      ctx.moveTo(mx, my + 33); ctx.lineTo(mx, my + 42);
+      ctx.stroke();
+    }
+
+    // bloom
+    if ((this.props.bloom ?? true) && !this.reduce && this.glowC && this.glowC.width > 2) {
+      const g = this.glowC, gx = this.glowX;
+      gx.setTransform(1, 0, 0, 1, 0, 0);
+      gx.clearRect(0, 0, g.width, g.height);
+      gx.filter = 'blur(1.6px)';
+      gx.drawImage(this.canvas, 0, 0, g.width, g.height);
+      gx.filter = 'none';
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.globalAlpha = 0.32 - 0.14 * w0;
+      ctx.drawImage(g, 0, 0, w, h);
+      ctx.globalAlpha = 1;
+    }
+
+    // act-change transition glitch
+    const fl = 1 - Math.min(1, (now - this.flash) / 400);
+    if (fl > 0) {
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = 'rgba(' + tint + ',' + (0.035 * fl).toFixed(4) + ')';
+      ctx.fillRect(0, 0, w, h);
+      for (let b = 0; b < 6; b++) {
+        const yb = ((b * 149 + Math.floor(now / 55) * 37) % Math.max(1, h)) | 0;
+        ctx.fillStyle = 'rgba(' + tint + ',' + (0.1 * fl).toFixed(4) + ')';
+        ctx.fillRect(0, yb, w, 1 + (b % 2));
+      }
+    }
+
+    ctx.globalCompositeOperation = 'source-over';
+    if (labelPts.length) {
+      ctx.font = "500 10.5px 'IBM Plex Mono', monospace";
+      ctx.textAlign = 'center';
+      labelPts.forEach(l => {
+        ctx.fillStyle = 'rgba(20,21,30,' + (0.55 * l[3]).toFixed(3) + ')';
+        const tw = ctx.measureText(l[2]).width + 14;
+        ctx.fillRect(l[0] - tw / 2, l[1] - 11, tw, 16);
+        ctx.fillStyle = 'rgba(218,210,255,' + (0.86 * l[3]).toFixed(3) + ')';
+        ctx.fillText(l[2], l[0], l[1]);
+      });
+      ctx.textAlign = 'start';
+    }
+    this.hud(af, now);
+  }
+
+  hud(af, now) {
+    if (now - (this.lastHud || 0) < 90) return;
+    this.lastHud = now;
+    const HUE = ['255', '255', '22', '300', '148'];
+    const near = Math.max(0, Math.min(4, Math.round(af)));
+    if (this.rail) {
+      this.rail.style.height = ((af / (this.ACTS - 1)) * 100).toFixed(1) + '%';
+      this.rail.style.boxShadow = '0 0 12px oklch(70% 0.16 ' + HUE[near] + ' / 0.55)';
+    }
+    if (this.stageState) {
+      const NAMES = ['EXPOSURE', 'EXTRACTION', 'HOMOGRAPH', 'ENRICHMENT', 'DECISION'];
+      this.stageState.textContent = 'STAGE ' + (near + 1) + '/5 \u00b7 ' + NAMES[near];
+      this.stageState.style.color = 'oklch(74% 0.13 ' + HUE[near] + ')';
+    }
+    if (this.cue) this.cue.style.opacity = Math.max(0, 1 - af * 3).toFixed(2);
+    const w0 = Math.max(0, 1 - af / 0.75);
+    if (this.rows && this.routes && w0 > 0.02 && now - (this.feedTick || 0) > 1500) {
+      this.feedTick = now;
+      const HEX = { 1: 'oklch(74% 0.14 255)', 2: 'oklch(68% 0.19 22)', 4: 'oklch(70% 0.16 300)' };
+      for (let k = 0; k < this.rows.length; k++) {
+        const el = this.rows[k];
+        if (!el || el.children.length < 3) continue;
+        const rt = this.routes[(this.feedAt + k) % this.routes.length];
+        el.children[0].style.background = HEX[rt.col] || HEX[1];
+        el.children[1].textContent = rt.from + ' \u2192 ' + rt.to;
+        el.children[2].textContent = rt.label;
+        el.style.opacity = k === 0 ? '1' : (1 - k * 0.16).toFixed(2);
+      }
+      this.feedAt = (this.feedAt + 1) % this.routes.length;
+    }
+    if (this.panels) this.panels.forEach((el, k) => {
+      if (!el) return;
+      const dz = af - k;
+      const o = Math.max(0, 1 - Math.abs(dz) / 0.62);
+      const s = o * o;
+      el.style.opacity = s.toFixed(3);
+      el.style.transform = 'translateY(calc(-50% + ' + (dz * 42).toFixed(1) + 'px)) translateX(' + (dz * -16).toFixed(1) + 'px) scale(' + (0.972 + 0.028 * s).toFixed(4) + ')';
+      el.style.filter = o < 0.98 ? 'blur(' + ((1 - o) * 5).toFixed(1) + 'px)' : 'none';
+      el.style.visibility = s < 0.004 ? 'hidden' : 'visible';
+    });
+    if (this.dots) this.dots.forEach((el, k) => {
+      if (!el) return;
+      const on = Math.abs(af - k) < 0.5;
+      const done = af - k >= 0.5;
+      el.style.transition = 'transform 280ms cubic-bezier(.2,.8,.2,1), box-shadow 280ms ease, background 280ms ease';
+      el.style.background = on ? 'linear-gradient(135deg, oklch(80% 0.15 ' + HUE[k] + '), oklch(64% 0.17 ' + HUE[k] + '))'
+        : done ? 'oklch(52% 0.09 ' + HUE[k] + ')' : 'oklch(12% 0.015 260)';
+      el.style.borderColor = on || done ? 'transparent' : 'oklch(100% 0 0 / 0.3)';
+      el.style.transform = on ? 'scale(1.35)' : 'scale(1)';
+      el.style.boxShadow = on ? '0 0 13px oklch(72% 0.16 ' + HUE[k] + ' / 0.6)' : 'none';
+    });
+    if (this.vizEls) for (let k = 1; k <= 4; k++) {
+      const el = this.vizEls[k];
+      if (!el) continue;
+      const dz = af - k;
+      const o = Math.max(0, 1 - Math.abs(dz) / 0.58);
+      const s = o * o;
+      el.style.opacity = s.toFixed(3);
+      el.style.transform = 'translateY(' + (dz * 26).toFixed(1) + 'px) scale(' + ((0.985 + 0.015 * s) * (el.__fit || 1)).toFixed(4) + ')';
+      el.style.visibility = s < 0.006 ? 'hidden' : 'visible';
+      el.style.pointerEvents = s > 0.7 ? 'auto' : 'none';
+      if (s < 0.006) continue;
+      let steps = el.__steps;
+      if (!steps) { steps = el.__steps = Array.from(el.querySelectorAll('[data-step]')); }
+      const prog = Math.max(0, Math.min(1, (af - k + 0.46) / 0.46));
+      steps.forEach((sEl, n) => {
+        const gate = n / (steps.length + 0.6);
+        const r = Math.max(0, Math.min(1, (prog - gate) / 0.34));
+        sEl.style.opacity = r.toFixed(3);
+        sEl.style.transform = 'translateY(' + ((1 - r) * 12).toFixed(1) + 'px)';
+      });
+    }
+    if (this.elNodes) this.elNodes.textContent = (1.18 + af * 0.31).toFixed(2) + ' M';
+    this.blocked += Math.round(3 + Math.random() * 9);
+    if (this.elBlocked) this.elBlocked.textContent = this.blocked.toLocaleString();
+    if (this.elState) {
+      const names = ['INGEST', 'EXTRACT', 'HOMOGRAPH', 'ENRICH', 'VERDICT'];
+      this.elState.textContent = names[Math.round(af)] || 'INGEST';
+    }
+  }
+}
+</script>
+</body>
+</html>

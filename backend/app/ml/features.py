@@ -2,8 +2,8 @@
 features.py
 
 Extracts 19 lexical features from a URL string.
-This exact file must match what was used during model training —
-any change here requires retraining the model.
+This file must match exactly what was used during model training.
+Any change here requires retraining the model.
 """
 
 import re
@@ -51,7 +51,7 @@ LEGITIMATE_BRAND_DOMAINS = {
 IP_REGEX     = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
 SCHEME_REGEX = re.compile(r'^[a-z][a-z0-9+.\-]*://', re.IGNORECASE)
 
-# The exact ordered list the model was trained on — do not change order
+# Exact order the model was trained on — do not change
 FEATURE_ORDER = [
     'url_length', 'hostname_length', 'path_length',
     'count_dots', 'count_hyphens', 'count_underscores', 'count_slashes',
@@ -64,7 +64,6 @@ FEATURE_ORDER = [
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
 def shannon_entropy(s: str) -> float:
-    """Measures how random/obfuscated a string looks."""
     if not s:
         return 0.0
     counts = Counter(s)
@@ -78,11 +77,6 @@ def normalize_url(raw: str) -> str:
 
 
 def is_brand_impersonation(hostname: str) -> bool:
-    """
-    Returns True if a known brand name appears in the domain's SLD
-    but the hostname isn't actually that brand's legitimate domain.
-    Catches: amazonrewads.ga, paypal-secure-update.xyz, etc.
-    """
     if not hostname:
         return False
     parts = hostname.split('.')
@@ -100,16 +94,10 @@ def is_brand_impersonation(hostname: str) -> bool:
 def extract_features(raw_url: str) -> dict:
     """
     Returns a human-readable feature dict.
-    Used for both model input (via features_to_vector) and
-    the Evidence Log displayed on the frontend.
-
-    NOTE: all string counts use the scheme-stripped form of the URL.
-    The training dataset had wildly uneven scheme presence across classes
-    (a data collection artifact), so including the scheme would cause the
-    model to learn 'starts with http://' as a label proxy rather than
-    real URL structure.
+    Used for both model input (via features_to_vector)
+    and the Evidence Log displayed on the frontend.
     """
-    raw_url = str(raw_url).strip()
+    raw_url   = str(raw_url).strip()
     normalized = normalize_url(raw_url)
 
     try:
@@ -123,40 +111,41 @@ def extract_features(raw_url: str) -> dict:
     is_ip    = bool(IP_REGEX.match(hostname))
 
     # Scheme-stripped content for all string-based counts
+    # (avoids data leakage from scheme-presence artifact in training data)
     content    = SCHEME_REGEX.sub('', raw_url)
     full_lower = content.lower()
     digits     = sum(c.isdigit() for c in content)
     tld        = hostname.rsplit('.', 1)[-1].lower() if '.' in hostname else ''
 
     return {
-        'url_length':           len(content),
-        'hostname_length':      len(hostname),
-        'path_length':          len(path),
-        'count_dots':           hostname.count('.'),
-        'count_hyphens':        content.count('-'),
-        'count_underscores':    content.count('_'),
-        'count_slashes':        content.count('/'),
-        'count_question_marks': content.count('?'),
-        'count_equals':         content.count('='),
-        'count_at':             content.count('@'),
-        'count_digits':         digits,
-        'digit_ratio':          round(digits / len(content), 4) if content else 0.0,
-        'is_ip_host':           is_ip,
-        'uses_https':           scheme == 'https',   # display only — not a model feature
-        'subdomain_count':      max(hostname.count('.') - 1, 0) if hostname and not is_ip else 0,
-        'suspicious_tld':       tld in SUSPICIOUS_TLDS,
-        'brand_impersonation':  is_brand_impersonation(hostname),
+        'url_length':            len(content),
+        'hostname_length':       len(hostname),
+        'path_length':           len(path),
+        'count_dots':            hostname.count('.'),
+        'count_hyphens':         content.count('-'),
+        'count_underscores':     content.count('_'),
+        'count_slashes':         content.count('/'),
+        'count_question_marks':  content.count('?'),
+        'count_equals':          content.count('='),
+        'count_at':              content.count('@'),
+        'count_digits':          digits,
+        'digit_ratio':           round(digits / len(content), 4) if content else 0.0,
+        'is_ip_host':            is_ip,
+        'uses_https':            scheme == 'https',   # display only, not a model feature
+        'subdomain_count':       max(hostname.count('.') - 1, 0) if hostname and not is_ip else 0,
+        'suspicious_tld':        tld in SUSPICIOUS_TLDS,
+        'brand_impersonation':   is_brand_impersonation(hostname),
         'suspicious_keyword_hit': next((k for k in SUSPICIOUS_KEYWORDS if k in full_lower), None),
-        'is_shortened':         any(s in hostname for s in SHORTENING_SERVICES),
-        'url_entropy':          round(shannon_entropy(content), 3),
+        'is_shortened':          any(s in hostname for s in SHORTENING_SERVICES),
+        'url_entropy':           round(shannon_entropy(content), 3),
     }
 
 
 def features_to_vector(features: dict) -> list:
     """
     Converts the feature dict into the exact numeric vector the model expects.
-    `uses_https` is intentionally excluded (see extract_features docstring).
-    `suspicious_keyword_hit` is collapsed to a binary 0/1 flag.
+    uses_https excluded (dataset artifact).
+    suspicious_keyword_hit collapsed to binary 0/1.
     """
     return [
         features['url_length'],

@@ -1,13 +1,13 @@
 """
 main.py
 
-Triage Desk — FastAPI Backend
+URLSentinel — FastAPI Backend
 
 Endpoints:
-  GET  /health          — liveness check
-  POST /analyze         — classify a URL or IP
-  GET  /history         — recent scan history from DB
-  POST /feedback        — save analyst action (allow / block / escalate)
+  GET  /health      — liveness check
+  POST /analyze     — classify a URL or IP
+  GET  /history     — recent scans from Neon PostgreSQL
+  POST /feedback    — save analyst action (allow / block / escalate)
 
 Run:
   uvicorn app.main:app --reload --port 8000
@@ -24,18 +24,17 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from .ml.predict import classify_url
-from .ip_analysis import analyze_ip
-from .idn.idn_detector import detect as idn_detect, is_idn_domain
-from . import database
+from .ml.predict    import classify_url
+from .ip_analysis   import analyze_ip
+from .idn.idn_detector import detect as idn_detect
+from .              import database
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = FastAPI(title='Triage Desk API', version='2.0')
+app = FastAPI(title='URLSentinel API', version='1.0')
 
 # CORS — allow the Vite dev server
-# Add your deployed frontend URL here before going to production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -49,14 +48,14 @@ app.add_middleware(
 IP_REGEX = re.compile(r'^(\d{1,3}\.){3}\d{1,3}$')
 
 
-# ── Startup ──────────────────────────────────────────────────────────────────
+# ── Startup ───────────────────────────────────────────────────────────────────
 
 @app.on_event('startup')
 def on_startup():
     database.init_db()
 
 
-# ── Schemas ──────────────────────────────────────────────────────────────────
+# ── Schemas ───────────────────────────────────────────────────────────────────
 
 class AnalyzeRequest(BaseModel):
     input: str
@@ -66,11 +65,11 @@ class FeedbackRequest(BaseModel):
     action:  str        # allow | block | escalate
 
 
-# ── Endpoints ────────────────────────────────────────────────────────────────
+# ── Endpoints ─────────────────────────────────────────────────────────────────
 
 @app.get('/health')
 def health():
-    return {'status': 'ok', 'version': '2.0'}
+    return {'status': 'ok', 'version': '1.0'}
 
 
 @app.post('/analyze')
@@ -86,20 +85,18 @@ def analyze(req: AnalyzeRequest):
             result     = analyze_ip(raw)
             input_type = 'ip'
         else:
-            # Run IDN check first — if it's a homograph attack, flag it
-            # regardless of what the ML model says
+            # IDN check before the ML model
             from urllib.parse import urlparse
             from .ml.features import normalize_url
-            hostname = urlparse(normalize_url(raw)).hostname or ''
-
+            hostname   = urlparse(normalize_url(raw)).hostname or ''
             idn_result = idn_detect(hostname)
             result     = classify_url(raw)
             input_type = 'url'
 
-            # Merge IDN findings into the result
+            # Merge IDN findings if detected
             if idn_result['homograph_detected']:
                 result['features'].update({
-                    'homograph_detected':  idn_result['homograph_detected'],
+                    'homograph_detected':  True,
                     'unicode_chars_found': str(idn_result['unicode_chars_found']),
                     'lookalike_domain':    idn_result['lookalike_domain'],
                 })
@@ -141,22 +138,17 @@ def analyze(req: AnalyzeRequest):
 @app.get('/history')
 def history(limit: int = 20):
     try:
-        rows = database.get_recent_scans(limit)
+        return database.get_recent_scans(limit)
     except Exception as e:
         raise HTTPException(status_code=503, detail=f'History unavailable: {e}')
-    return rows
 
 
 @app.post('/feedback')
 def feedback(req: FeedbackRequest):
-    valid_actions = {'allow', 'block', 'escalate'}
-    if req.action not in valid_actions:
-        raise HTTPException(
-            status_code=400,
-            detail=f'Invalid action. Must be one of: {", ".join(valid_actions)}'
-        )
+    if req.action not in {'allow', 'block', 'escalate'}:
+        raise HTTPException(status_code=400, detail='Action must be: allow, block, or escalate.')
+
     if req.case_id is None:
-        # No DB case ID (e.g. scan wasn't persisted) — just acknowledge
         return {'saved': False, 'message': 'No case ID — feedback not persisted.'}
 
     saved = database.insert_feedback(req.case_id, req.action)

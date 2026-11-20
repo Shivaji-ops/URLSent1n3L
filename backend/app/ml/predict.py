@@ -2,14 +2,8 @@
 predict.py
 
 Two-stage URL classification:
-  1. Allowlist — verified popular domains bypass the model entirely
-  2. Random Forest model — everything else gets classified
-
-Why an allowlist? Pure lexical features can't fully distinguish a short,
-clean legitimate domain (amazon.in) from a similarly short lookalike
-(amazonrewads.ga) with 100% reliability — this is a documented limitation
-of lexical-only phishing detection. Production systems handle it the same
-way: a verified allowlist for high-traffic domains, ML for everything else.
+  1. Allowlist  — verified popular domains bypass the model entirely
+  2. ML model   — Random Forest classifies everything else
 """
 
 import os
@@ -21,22 +15,20 @@ from .features import extract_features, features_to_vector, normalize_url
 
 logger = logging.getLogger(__name__)
 
-_DIR   = os.path.dirname(os.path.abspath(__file__))
-_MODEL = None
+_DIR    = os.path.dirname(os.path.abspath(__file__))
+_MODEL  = None
 _SCALER = None
 
 
-def _load_models():
+def _load():
     global _MODEL, _SCALER
     if _MODEL is None:
-        model_path  = os.path.join(_DIR, 'models', 'model.joblib')
-        scaler_path = os.path.join(_DIR, 'models', 'scaler.joblib')
-        _MODEL  = joblib.load(model_path)
-        _SCALER = joblib.load(scaler_path)
-        logger.info('ML model loaded successfully.')
+        _MODEL  = joblib.load(os.path.join(_DIR, 'models', 'model.joblib'))
+        _SCALER = joblib.load(os.path.join(_DIR, 'models', 'scaler.joblib'))
+        logger.info('ML model loaded.')
 
 
-ALLOWLISTED_DOMAINS = {
+ALLOWLIST = {
     'google.com', 'youtube.com', 'facebook.com', 'wikipedia.org',
     'amazon.com', 'amazon.in', 'twitter.com', 'x.com', 'instagram.com',
     'linkedin.com', 'github.com', 'stackoverflow.com', 'microsoft.com',
@@ -57,24 +49,20 @@ ALLOWLISTED_DOMAINS = {
 }
 
 
-def _registrable_domain(hostname: str) -> str:
+def _registrable(hostname: str) -> str:
     parts = hostname.split('.')
     return '.'.join(parts[-2:]) if len(parts) >= 2 else hostname
 
 
 def classify_url(raw_url: str) -> dict:
-    """
-    Classifies a URL as Benign or Malicious.
-    Returns a dict matching the /analyze response shape.
-    """
-    _load_models()
+    _load()
 
-    features      = extract_features(raw_url)
-    parsed_host   = urlparse(normalize_url(raw_url)).hostname or ''
-    reg_domain    = _registrable_domain(parsed_host)
+    features     = extract_features(raw_url)
+    parsed_host  = urlparse(normalize_url(raw_url)).hostname or ''
+    reg_domain   = _registrable(parsed_host)
 
-    # Stage 1 — allowlist check
-    if reg_domain in ALLOWLISTED_DOMAINS:
+    # Stage 1 — allowlist
+    if reg_domain in ALLOWLIST:
         return {
             'verdict':          'Benign',
             'confidence':       99,
@@ -85,24 +73,23 @@ def classify_url(raw_url: str) -> dict:
         }
 
     # Stage 2 — ML model
-    vector   = features_to_vector(features)
-    scaled   = _SCALER.transform([vector])
-    pred     = _MODEL.predict(scaled)[0]
-    proba    = _MODEL.predict_proba(scaled)[0]
-    is_mal   = pred == 1
-    confidence = round((proba[1] if is_mal else proba[0]) * 100, 1)
+    vector = features_to_vector(features)
+    scaled = _SCALER.transform([vector])
+    pred   = _MODEL.predict(scaled)[0]
+    proba  = _MODEL.predict_proba(scaled)[0]
+    is_mal = pred == 1
+    conf   = round((proba[1] if is_mal else proba[0]) * 100, 1)
 
-    # Build flagged features list for Evidence Log highlights
     flagged = []
-    if features['is_ip_host']:         flagged.append('is_ip_host')
-    if features['suspicious_tld']:     flagged.append('suspicious_tld')
-    if features['brand_impersonation']:flagged.append('brand_impersonation')
+    if features['is_ip_host']:           flagged.append('is_ip_host')
+    if features['suspicious_tld']:       flagged.append('suspicious_tld')
+    if features['brand_impersonation']:  flagged.append('brand_impersonation')
     if features['suspicious_keyword_hit']: flagged.append('suspicious_keyword_hit')
-    if features['is_shortened']:       flagged.append('is_shortened')
+    if features['is_shortened']:         flagged.append('is_shortened')
 
     return {
         'verdict':          'Malicious' if is_mal else 'Benign',
-        'confidence':       confidence,
+        'confidence':       conf,
         'attack_type':      'Phishing' if is_mal else None,
         'features':         features,
         'flagged_features': flagged,

@@ -1,22 +1,23 @@
-# Triage Desk — Backend v2
+# URLSentinel — Backend
 
-FastAPI backend for URL/IP malicious indicator classification.
+FastAPI backend for URL and IP malicious indicator classification.
+Uses Neon serverless PostgreSQL for scan history and analyst feedback.
 
 ## Project Structure
 
 ```
 app/
   main.py           — FastAPI app, all endpoints
-  database.py        — PostgreSQL: scans + feedback tables
-  ip_analysis.py     — IP reputation lookup via ip-api.com
+  database.py       — Neon PostgreSQL: scans + feedback tables
+  ip_analysis.py    — IP reputation via ip-api.com
   ml/
-    features.py      — 19 lexical feature extraction (must match training)
-    predict.py       — allowlist check + Random Forest inference
+    features.py     — 19 lexical feature extraction
+    predict.py      — allowlist + Random Forest inference
     models/
-      model.joblib   ← put your trained model here
-      scaler.joblib  ← put your fitted scaler here
+      model.joblib   ← copy your trained model here
+      scaler.joblib  ← copy your fitted scaler here
   idn/
-    idn_detector.py  — IDN homograph detection (stub, Week 9)
+    idn_detector.py — IDN homograph detection (Week 9)
 ```
 
 ## Setup
@@ -24,29 +25,24 @@ app/
 ```bash
 python -m venv venv
 venv\Scripts\activate        # Windows
-# source venv/bin/activate   # Mac/Linux
-
 pip install -r requirements.txt
 ```
 
-## Add your model files
+## Add model files
 
-Copy `model.joblib` and `scaler.joblib` from your training output into:
+Copy `model.joblib` and `scaler.joblib` into:
 ```
 app/ml/models/model.joblib
 app/ml/models/scaler.joblib
 ```
 
-## Configure database (optional)
+## Connect Neon
 
 ```bash
-copy .env.example .env      # Windows
-# cp .env.example .env      # Mac/Linux
+copy .env.example .env
 ```
 
-Edit `.env` and fill in your `DATABASE_URL`.
-The app works fine without a database — `/analyze` still classifies,
-scans just won't be saved to history.
+Edit `.env` and paste your Neon connection string from neon.tech.
 
 ## Run
 
@@ -54,22 +50,27 @@ scans just won't be saved to history.
 uvicorn app.main:app --reload --port 8000
 ```
 
+On startup the backend will:
+- Connect to Neon
+- Auto-create `scans` and `feedback` tables
+- Log `Neon database ready.`
+
 ## Test
 
-Open `http://localhost:8000/docs` for the interactive API documentation.
+Open `http://localhost:8000/docs` for interactive API docs.
 
 ## Endpoints
 
-| Method | Path        | Description                          |
-|--------|-------------|--------------------------------------|
-| GET    | /health     | Liveness check                       |
-| POST   | /analyze    | Classify a URL or IP                 |
-| GET    | /history    | Recent scan history from DB          |
-| POST   | /feedback   | Save Allow / Block / Escalate action |
+| Method | Path       | Description                        |
+|--------|------------|------------------------------------|
+| GET    | /health    | Liveness check                     |
+| POST   | /analyze   | Classify a URL or IP               |
+| GET    | /history   | Recent scans from Neon             |
+| POST   | /feedback  | Save Allow / Block / Escalate      |
 
-## Adding your model files
+## Works without Neon
 
-The model files are not included in this zip (too large).
-They come from running `Triage_Desk_Model_Training.ipynb` in Google Colab.
-After training, download `models/model.joblib` and `models/scaler.joblib`
-and place them in `app/ml/models/`.
+If `DATABASE_URL` is not set:
+- `/analyze` still classifies correctly
+- `/history` returns a clear 503 with an actionable message
+- No scan is lost due to a database error
